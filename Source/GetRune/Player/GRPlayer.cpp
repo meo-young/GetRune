@@ -1,4 +1,5 @@
 ﻿#include "GRPlayer.h"
+#include "GetRune/Item/GRItemBase.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -6,23 +7,45 @@
 #include "GetRune/Input/GRInputComponent.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 #include "InputMappingContext.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
+#include "GetRune/GetRune.h"
 #include "GetRune/GRGameplayTags.h"
 #include "GetRune/AbilitySystem/GRAbilitySystemComponent.h"
-#include "GetRune/Input/GRInputComponent.h"
 
 AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	// SpringArmComponent 생성
+	// CapsuleComponent 설정
+	{
+		GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
+	}
+	
+	// SpringArmComponent 설정
 	{
 		SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 		SpringArmComponent->SetupAttachment(RootComponent);
 	}
 	
-	// CameraComponent 생성
+	// CameraComponent 설정
 	{
 		CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 		CameraComponent->SetupAttachment(SpringArmComponent);
 	}
+	
+	// MagnetCollisionComponent 설정
+	{
+		MagnetCollision = CreateDefaultSubobject<USphereComponent>(TEXT("MagnetCollision"));
+		MagnetCollision->SetupAttachment(GetMesh());
+		MagnetCollision->SetCollisionProfileName(TEXT("Magnet"));
+	}
+}
+
+void AGRPlayer::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	MagnetCollision->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnMagnetBeginOverlap);
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 }
 
 void AGRPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -90,5 +113,21 @@ void AGRPlayer::Input_Move(const FInputActionValue& InputActionValue)
 			const FVector MovementDirection = MovementRotation.RotateVector(FVector::ForwardVector);
 			AddMovementInput(MovementDirection, Value.Y);
 		}
+	}
+}
+
+void AGRPlayer::OnMagnetBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (IPickupable* Pickupable = Cast<IPickupable>(OtherActor))
+	{
+		Pickupable->OnMagnetOverlapped();
+	}
+}
+
+void AGRPlayer::OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (IPickupable* Pickupable = Cast<IPickupable>(OtherActor))
+	{
+		Pickupable->OnPlayerOverlapped();
 	}
 }

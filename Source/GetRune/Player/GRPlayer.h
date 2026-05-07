@@ -4,6 +4,7 @@
 #include "GetRune/Character/GRCharacter.h"
 #include "GRPlayer.generated.h"
 
+class USphereComponent;
 struct FInputActionValue;
 class UGRInputConfig;
 class UCameraComponent;
@@ -18,6 +19,7 @@ class GETRUNE_API AGRPlayer : public AGRCharacter
 // LifeSection	
 public:
 	AGRPlayer(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
 	
@@ -31,6 +33,15 @@ private:
 	void Input_Move(const FInputActionValue& InputActionValue);
 	
 	
+// Collision Overlap Binding
+private:
+	UFUNCTION()
+	void OnMagnetBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION()
+	void OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	
 // Component
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -38,6 +49,9 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USphereComponent> MagnetCollision;
 	
 	
 // Input Variable	

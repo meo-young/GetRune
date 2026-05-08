@@ -31,9 +31,13 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "변수|어빌리티")
 	TObjectPtr<UGRAbilitySystemComponent> AbilitySystemComponent;
 	
+private:
+	int32 CurrentStageNum = 1;
+	
 
 // Getter, Setter	
 public:
 	FORCEINLINE UGRAbilitySystemComponent* GetAbilitySystemComponent() const { return AbilitySystemComponent; }
+	FORCEINLINE int32 GetCurrentStageNum() const { return CurrentStageNum; }
 	
 };

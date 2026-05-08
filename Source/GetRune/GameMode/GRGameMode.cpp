@@ -17,11 +17,13 @@ void AGRGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewP
 
 	// Pawn이 보장된 시점에 초기화합니다.
 	RuneSpawnManager->Initialize();
+	EnemySpawnManager->Initialize();
 }
 
 void AGRGameMode::StartPlay()
 {
 	Super::StartPlay();
 	
-	RuneSpawnManager->StartRuneSpawn();
+	RuneSpawnManager->StartSpawn();
+	EnemySpawnManager->StartSpawn();
 }

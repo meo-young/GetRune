@@ -12,6 +12,8 @@
 #include "GetRune/GetRune.h"
 #include "GetRune/GRGameplayTags.h"
 #include "GetRune/AbilitySystem/GRAbilitySystemComponent.h"
+#include "GetRune/Component/GRRuneSpawnComponent.h"
+#include "GetRune/Subsystem/GRDataTableSubsystem.h"
 
 AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -38,12 +40,18 @@ AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(Object
 		MagnetCollision->SetupAttachment(GetMesh());
 		MagnetCollision->SetCollisionProfileName(TEXT("Magnet"));
 	}
+	
+	// RuneSpawnComponent 설정
+	{
+		RuneSpawnComponent = CreateDefaultSubobject<UGRRuneSpawnComponent>(TEXT("RuneSpawnComponent"));
+	}
 }
 
 void AGRPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Collision Overlap 이벤트에 함수를 바인딩합니다.
 	MagnetCollision->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnMagnetBeginOverlap);
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 }

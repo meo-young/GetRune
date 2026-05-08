@@ -12,7 +12,7 @@ void AGRCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 P
 {
 	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
 	
-	const UGRCharacterMovementComponent* MoveComp = CastChecked<UGRCharacterMovementComponent>(GetCharacterMovement());
+	const UGRCharacterMovementComponent* MoveComp = Cast<UGRCharacterMovementComponent>(GetCharacterMovement());
 	
 	SetMovementModeTag(PrevMovementMode, PreviousCustomMode, false);
 	SetMovementModeTag(MoveComp->MovementMode, MoveComp->CustomMovementMode, true);
@@ -25,7 +25,7 @@ UAbilitySystemComponent* AGRCharacter::GetAbilitySystemComponent() const
 
 void AGRCharacter::SetMovementModeTag(EMovementMode CurrentMovementMode, uint8 CurrentCustomMode, bool bTagEnabled)
 {
-	if (UGRAbilitySystemComponent* ASC = CastChecked<UGRAbilitySystemComponent>(GetAbilitySystemComponent()))
+	if (UGRAbilitySystemComponent* ASC = Cast<UGRAbilitySystemComponent>(GetAbilitySystemComponent()))
 	{
 		const FGameplayTag* MovementModeTag;
 		

@@ -24,5 +24,7 @@ void UGRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	
 	if (!Character || !MovementComponent) return;
 	
-	bIsMoving = MovementComponent->IsWalking();
+	const float Velocity = Character->GetVelocity().Length();
+	
+	MoveSpeedRatio = Velocity/MovementComponent->GetMaxSpeed();
 }

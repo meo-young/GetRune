@@ -13,6 +13,9 @@ struct GETRUNE_API FCharacterInfo : public FTableRowBase
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AGRPlayer> PlayerClass;
+	
+	UPROPERTY(EditAnywhere)
+	float MoveSpeed = 600.0f;
 
 	UPROPERTY(EditAnywhere)
 	uint8 RequiredRuneCount = 3;

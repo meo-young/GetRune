@@ -7,14 +7,11 @@
 #include "GRRuneBase.generated.h"
 
 UCLASS()
-class GETRUNE_API AGRRuneBase : public AGRItemBase, public IPoolable
+class GETRUNE_API AGRRuneBase : public AGRItemBase
 {
 	GENERATED_BODY()
 
 public:
-	virtual void OnPlayerOverlapped() override;
-	virtual void OnAcquiredFromPool() override;
-	virtual void OnReleasedToPool() override;
-
 	ERuneType RuneType = ERuneType::Red;
+	
 };

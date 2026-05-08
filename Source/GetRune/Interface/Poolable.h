@@ -15,6 +15,6 @@ class GETRUNE_API IPoolable
 	GENERATED_BODY()
 
 public:
-	virtual void OnAcquiredFromPool() {}
-	virtual void OnReleasedToPool() {}
+	virtual void OnActivated() = 0;
+	virtual void OnDeactivated() = 0;
 };

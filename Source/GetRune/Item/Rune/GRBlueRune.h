@@ -9,5 +9,7 @@ class GETRUNE_API AGRBlueRune : public AGRRuneBase
 {
 	GENERATED_BODY()
 
-
+public:
+	AGRBlueRune();
+	
 };

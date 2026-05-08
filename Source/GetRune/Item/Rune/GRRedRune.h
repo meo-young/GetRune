@@ -8,5 +8,8 @@ UCLASS()
 class GETRUNE_API AGRRedRune : public AGRRuneBase
 {
 	GENERATED_BODY()
+	
+public:
+	AGRRedRune();
 
 };

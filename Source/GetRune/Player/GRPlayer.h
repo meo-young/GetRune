@@ -4,7 +4,6 @@
 #include "GetRune/Character/GRCharacter.h"
 #include "GRPlayer.generated.h"
 
-class UGRRuneSpawnComponent;
 class USphereComponent;
 struct FInputActionValue;
 class UGRInputConfig;
@@ -53,9 +52,6 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USphereComponent> MagnetCollision;
-	
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UGRRuneSpawnComponent> RuneSpawnComponent;
 	
 	
 // Input Variable	

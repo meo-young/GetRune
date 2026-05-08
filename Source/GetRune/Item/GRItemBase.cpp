@@ -39,6 +39,8 @@ void AGRItemBase::Tick(float DeltaTime)
 
 void AGRItemBase::OnMagnetOverlapped()
 {
+	if (bIsAttracting) return;
+	
 	// 자석 범위에 진입하면 인력을 시작하고 초기 속도를 설정합니다.
 	bIsAttracting = true;
 	CurrentMagnetSpeed = MagnetInitialSpeed;
@@ -62,7 +64,7 @@ void AGRItemBase::MagnetAttract(const float InDeltaTime)
 	// 보간을 통해 부드럽게 이동합니다.
 	const FVector TargetLocation = Player->GetActorLocation();
 	const FVector NewLocation = FMath::VInterpConstantTo(GetActorLocation(), TargetLocation, InDeltaTime, CurrentMagnetSpeed);
-	SetActorLocation(NewLocation, true);
+	SetActorLocation(NewLocation, false);
 }
 
 void AGRItemBase::OnActivated()

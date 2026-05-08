@@ -23,7 +23,16 @@ class GETRUNE_API URuneInfo : public UDataAsset
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "종류")
 	TMap<ERuneType, TSubclassOf<AGRRuneBase>> RuneClass;
+	
+	UPROPERTY(EditAnywhere, Category = "수치")
+	float InnerRadius = 400.f;
+	
+	UPROPERTY(EditAnywhere, Category = "수치")
+	float OuterRadius = 700.f;
+	
+	UPROPERTY(EditAnywhere, Category = "수치")
+	int32 MaxRuneCount = 100;
 	
 };

@@ -31,6 +31,5 @@ private:
 // State Variable	
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	uint8 bIsMoving : 1 = false;
-	
+	float MoveSpeedRatio;
 };

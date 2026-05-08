@@ -9,11 +9,12 @@
 #include "InputMappingContext.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GetRune/GetRune.h"
 #include "GetRune/GRGameplayTags.h"
 #include "GetRune/AbilitySystem/GRAbilitySystemComponent.h"
-#include "GetRune/Component/GRRuneSpawnComponent.h"
 #include "GetRune/Subsystem/GRDataTableSubsystem.h"
+#include "Kismet/GameplayStatics.h"
 
 AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -40,11 +41,6 @@ AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(Object
 		MagnetCollision->SetupAttachment(GetMesh());
 		MagnetCollision->SetCollisionProfileName(TEXT("Magnet"));
 	}
-	
-	// RuneSpawnComponent 설정
-	{
-		RuneSpawnComponent = CreateDefaultSubobject<UGRRuneSpawnComponent>(TEXT("RuneSpawnComponent"));
-	}
 }
 
 void AGRPlayer::BeginPlay()
@@ -54,6 +50,10 @@ void AGRPlayer::BeginPlay()
 	// Collision Overlap 이벤트에 함수를 바인딩합니다.
 	MagnetCollision->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnMagnetBeginOverlap);
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
+	
+	// 캐릭터의 기본 수치를 초기화합니다.
+	const UGRDataTableSubsystem* DTS = GetGameInstance()->GetSubsystem<UGRDataTableSubsystem>();
+	GetCharacterMovement()->MaxWalkSpeed = DTS->GetCharacterInfo(GetClass())->MoveSpeed;
 }
 
 void AGRPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

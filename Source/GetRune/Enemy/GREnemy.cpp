@@ -40,6 +40,11 @@ AGREnemy::AGREnemy()
 		GetMesh()->SetCollisionProfileName("NoCollision");
 		GetCapsuleComponent()->SetCollisionProfileName(TEXT("Enemy"));
 	}
+	
+	// 회전 속성을 설정합니다.
+	{
+		bUseControllerRotationYaw = false;
+	}
 }
 
 void AGREnemy::BeginPlay()

@@ -53,7 +53,9 @@ void AGRPlayer::BeginPlay()
 	
 	// 캐릭터의 기본 수치를 초기화합니다.
 	const UGRDataTableSubsystem* DTS = GetGameInstance()->GetSubsystem<UGRDataTableSubsystem>();
-	GetCharacterMovement()->MaxWalkSpeed = DTS->GetCharacterInfo(GetClass())->MoveSpeed;
+	const FCharacterInfo* CharacterInfo = DTS->GetCharacterInfo(GetClass());
+	GetCharacterMovement()->MaxWalkSpeed = CharacterInfo->MoveSpeed;
+	MagnetCollision->SetSphereRadius(CharacterInfo->MagnetRadius);
 }
 
 void AGRPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

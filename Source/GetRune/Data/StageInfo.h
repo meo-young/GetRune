@@ -22,10 +22,10 @@ public:
 	int32 Health = 100.0f;
 	
 	UPROPERTY(EditAnywhere)
-	int32 ContactDamage = 10.0f;
+	float ContactDamage = 10.0f;
 	
 	UPROPERTY(EditAnywhere)
-	int32 AttackPower = 0.0f;
+	float AttackPower = 0.0f;
 	
 	UPROPERTY(EditAnywhere)
 	TMap<TSubclassOf<AGRItemBase>, float> DroppedItems;
@@ -35,6 +35,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float AttackCooldown;
+
+	UPROPERTY(EditAnywhere)
+	float ProjectileSpeed = 600.f;
 	
 };
 

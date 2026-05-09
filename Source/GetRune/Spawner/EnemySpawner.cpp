@@ -36,6 +36,11 @@ void UEnemySpawner::StartWave()
 	SpawnInterval = WaveInfo.EnemySpawnInterval;
 	Super::StartSpawn();
 
+	if (CurrentWaveNum == CurrentStageInfo->WaveInfos.Num() - 1)
+	{
+		SpawnBoss();
+	}
+
 	GetWorld()->GetTimerManager().SetTimer(
 		WaveTimerHandle, this, &ThisClass::OnWaveEnd,
 		static_cast<float>(WaveInfo.WaveDuration), false
@@ -50,10 +55,6 @@ void UEnemySpawner::OnWaveEnd()
 	if (CurrentWaveNum < CurrentStageInfo->WaveInfos.Num())
 	{
 		StartWave();
-	}
-	else
-	{
-		SpawnBoss();
 	}
 }
 

@@ -37,6 +37,8 @@ public:
 // Member Function
 public:
 	void InitializeFromEnemyInfo(const UEnemyInfo* EnemyInfo);
+	virtual void Attack() {}
+	virtual void OnAttackFinished() {}
 
 private:
 	void HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplayEffectSpec* Spec, float Magnitude, float OldValue, float NewValue);
@@ -71,14 +73,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "변수|GE")
 	TSubclassOf<UGameplayEffect> ContactDamageGE;
 	
-private:
+protected:
 	UPROPERTY()
 	const UEnemyInfo* CurrentEnemyInfo = nullptr;
 	
+	bool bCanAttack = true;
 	FDelegateHandle DeathDelegateHandle;
 	float AttackRange = 0.f;
 	
 	FTimerHandle ContactCooldownHandle;
 	TWeakObjectPtr<AGRPlayer> OverlappingPlayer;
+	
+public:
+	FORCEINLINE bool CanAttack() const { return bCanAttack; }
 
 };

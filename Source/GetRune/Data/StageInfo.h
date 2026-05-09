@@ -16,17 +16,23 @@ public:
 	TSubclassOf<AGREnemy> EnemyClass;
 	
 	UPROPERTY(EditAnywhere)
-	int32 MoveSpeed;
+	int32 MoveSpeed = 300.0f;
 	
 	UPROPERTY(EditAnywhere)
-	int32 Health;
+	int32 Health = 100.0f;
 	
 	UPROPERTY(EditAnywhere)
-	int32 AttackPower;
+	int32 ContactDamage = 10.0f;
 	
 	UPROPERTY(EditAnywhere)
-	TMap<float, TSubclassOf<AGRItemBase>> DroppedItems;
+	int32 AttackPower = 0.0f;
 	
+	UPROPERTY(EditAnywhere)
+	TMap<TSubclassOf<AGRItemBase>, float> DroppedItems;
+
+	UPROPERTY(EditAnywhere)
+	float AttackRange = 80.f;
+
 	UPROPERTY(EditAnywhere)
 	float AttackCooldown;
 	
@@ -39,7 +45,7 @@ struct FWaveInfo
 	
 public:
 	UPROPERTY(EditAnywhere)
-	TMap<int32, TObjectPtr<UEnemyInfo>> EnemyClasses;
+	TMap<TObjectPtr<UEnemyInfo>, int32> EnemyClasses;
 	
 	UPROPERTY(EditAnywhere)
 	int32 WaveDuration = 30;

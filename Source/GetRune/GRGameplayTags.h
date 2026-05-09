@@ -11,4 +11,7 @@ namespace GRGameplayTags
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_Mode_Walking);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_Mode_Falling);
+
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(SetByCaller_Damage);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(SetByCaller_Heal);
 }

@@ -18,17 +18,24 @@ public:
 	UEnemySpawner();
 	
 
-// Member Function	
+// Member Function
 public:
 	virtual void Initialize() override;
+	virtual void StartSpawn() override;
 	virtual void Spawn() override;
 
 private:
 	virtual FVector GetRandomSpawnLocation() const override;
-	
-	
-// Member Variable	
+	void StartWave();
+	void OnWaveEnd();
+	void SpawnBoss();
+	const UEnemyInfo* SelectEnemyByWeight(const FWaveInfo& WaveInfo) const;
+
+
+// Member Variable
 private:
-	const FStageInfo* CurrentStageInfo;
-	
+	const FStageInfo* CurrentStageInfo = nullptr;
+	int32 CurrentWaveNum = 0;
+	FTimerHandle WaveTimerHandle;
+
 };

@@ -1,5 +1,6 @@
 #include "RuneSpawner.h"
 #include "GameFramework/Character.h"
+#include "GetRune/GetRune.h"
 #include "GetRune/Data/RuneInfo.h"
 #include "GetRune/Item/Rune/GRRuneBase.h"
 #include "GetRune/Player/GRPlayer.h"
@@ -19,16 +20,14 @@ URuneSpawner::URuneSpawner()
 
 void URuneSpawner::Initialize()
 {
-	// 플레이어에 대한 참조를 받아옵니다.
-	Player = Cast<AGRPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	if (!Player) return;
-
+	Super::Initialize();
+	
 	// 데이터 테이블에서 소유 캐릭터의 룬 설정을 가져옵니다.
 	const UGRDataTableSubsystem* DTS = GetDataTableSubsystem();
 	if (const FCharacterInfo* Info = DTS->GetCharacterInfo(Player->GetClass()))
 	{
 		AllowedRuneTypes = Info->GetAllowedRuneTypes();
-		RuneSpawnInterval = Info->RuneSpawnInterval;
+		SpawnInterval = Info->RuneSpawnInterval;
 	}
 
 	// 허용된 룬 타입별로 오브젝트 풀을 미리 생성합니다.
@@ -45,16 +44,16 @@ void URuneSpawner::Initialize()
 		}
 	}
 
-	SpawnedRuneCount = 0;
-	StartRuneSpawn();
+	SpawnedCount = 0;
+	StartSpawn();
 }
 
-void URuneSpawner::SpawnRune()
+void URuneSpawner::Spawn()
 {
 	if (AllowedRuneTypes.IsEmpty()) return;
 	
-	if (SpawnedRuneCount >= RuneData->MaxRuneCount) return;
-
+	if (SpawnedCount >= RuneData->MaxRuneCount) return;
+	
 	UGRObjectPoolSubsystem* Pool = GetObjectPoolSubsystem();
 	if (!Pool) return;
 
@@ -67,28 +66,7 @@ void URuneSpawner::SpawnRune()
 
 	// 풀에서 룬을 꺼내 무작위 위치에 배치합니다.
 	Pool->AcquireActor(*RuneClass, GetRandomSpawnLocation(), FRotator::ZeroRotator);
-	++SpawnedRuneCount;
-}
-
-void URuneSpawner::SpawnRunes(uint8 Count)
-{
-	// 지정한 수만큼 룬을 한 번에 소환합니다.
-	for (int i = 0; i < Count; i++)
-	{
-		SpawnRune();
-	}
-}
-
-void URuneSpawner::StartRuneSpawn()
-{
-	// 룬 소환 타이머를 가동합니다.
-	GetWorld()->GetTimerManager().SetTimer(RuneSpawnTimerHandle, this, &URuneSpawner::SpawnRune, RuneSpawnInterval, true);
-}
-
-void URuneSpawner::StopRuneSpawn()
-{
-	// 룬 소환 타이머를 중단합니다.
-	GetWorld()->GetTimerManager().ClearTimer(RuneSpawnTimerHandle);
+	++SpawnedCount;
 }
 
 FVector URuneSpawner::GetRandomSpawnLocation() const
@@ -104,14 +82,4 @@ FVector URuneSpawner::GetRandomSpawnLocation() const
 
 	// 소유자를 중심으로 원형 범위 내 임의 지점을 반환합니다.
 	return Player->GetActorLocation() + Dir * Radius;
-}
-
-UGRObjectPoolSubsystem* URuneSpawner::GetObjectPoolSubsystem() const
-{
-	return UGameplayStatics::GetGameInstance(GetWorld())->GetSubsystem<UGRObjectPoolSubsystem>();
-}
-
-UGRDataTableSubsystem* URuneSpawner::GetDataTableSubsystem() const
-{
-	return UGameplayStatics::GetGameInstance(GetWorld())->GetSubsystem<UGRDataTableSubsystem>();
 }

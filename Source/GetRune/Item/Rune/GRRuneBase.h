@@ -22,8 +22,4 @@ public:
 public:
 	ERuneType RuneType = ERuneType::Red;
 	
-private:
-	UPROPERTY()
-	TObjectPtr<URuneSpawner> RuneSpawner;
-	
 };

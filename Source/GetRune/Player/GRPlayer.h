@@ -5,6 +5,7 @@
 #include "GetRune/Data/CharacterInfo.h"
 #include "GRPlayer.generated.h"
 
+class URuneSpawner;
 class USphereComponent;
 struct FInputActionValue;
 class UGRInputConfig;
@@ -31,12 +32,12 @@ public:
 	
 // Member Function
 public:
-	void AddRune(ERuneType RuneType);
+	bool AddRune(ERuneType RuneType);
 	USkillInfo* GetCurrentSkillInfo() const { return CurrentSkillInfo; }
+	float GetCurrentDamage() const { return CurrentDamage; }
 
 private:
 	void Attack();
-	void StartAimPhase(ESkillType SkillType);
 	void FireSkill();
 	int32 GetCurrentTier() const;
 	ERuneType GetDominantRuneType() const;
@@ -76,30 +77,20 @@ private:
 
 // Attack Variable
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "변수|공격")
-	float AimDuration = 2.0f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "변수|공격")
-	float InstantDuration = 0.5f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "변수|공격")
-	float SlowMoScale = 0.05f;
-	
-private:
 	UPROPERTY()
 	TMap<ERuneType, FSkillTierData> CachedSkillData;
 
 	UPROPERTY()
 	TObjectPtr<USkillInfo> CurrentSkillInfo;
+	
+	UPROPERTY()
+	TObjectPtr<URuneSpawner> RuneSpawner;
 
+	float CurrentDamage = 0.f;
 	TMap<ERuneType, int32> RuneCounts;
 	TMap<ERuneType, int32> RuneLastAcquired;
 	int32 TotalRuneCount = 0;
 	int32 RequiredRuneCount = 0;
-
-	bool bIsAiming = false;
-	FTimerHandle AimTimerHandle;
-
-
+	
 	
 };

@@ -1,5 +1,7 @@
 #include "GREnemy.h"
 
+#include "AIController.h"
+#include "BrainComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayEffect.h"
@@ -64,6 +66,13 @@ void AGREnemy::PossessedBy(AController* NewController)
 
 void AGREnemy::OnActivated()
 {
+	if (AAIController* AIC = GetController<AAIController>())
+	{
+		if (UBrainComponent* Brain = AIC->GetBrainComponent())
+		{
+			Brain->RestartLogic();
+		}
+	}
 }
 
 void AGREnemy::OnDeactivated()
@@ -96,6 +105,14 @@ void AGREnemy::InitializeFromEnemyInfo(const UEnemyInfo* EnemyInfo)
 
 void AGREnemy::HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplayEffectSpec* Spec, float Magnitude, float OldValue, float NewValue)
 {
+	if (AAIController* AIC = GetController<AAIController>())
+	{
+		if (UBrainComponent* Brain = AIC->GetBrainComponent())
+		{
+			Brain->StopLogic("Death");
+		}
+	}
+
 	DropItems();
 
 	UGRObjectPoolSubsystem* OPS = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UGRObjectPoolSubsystem>();

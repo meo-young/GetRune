@@ -8,18 +8,9 @@
 void AGRRuneBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	RuneSpawner = Cast<AGRGameMode>(GetWorld()->GetAuthGameMode())->RuneSpawnManager;	
 }
 
 void AGRRuneBase::OnPlayerOverlapped()
 {
-	if (AGRPlayer* Player = Cast<AGRPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn()))
-	{
-		Player->AddRune(RuneType);
-	}
-
 	Super::OnPlayerOverlapped();
-
-	--RuneSpawner->SpawnedCount;
 }

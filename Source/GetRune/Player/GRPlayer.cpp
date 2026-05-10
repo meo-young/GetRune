@@ -16,6 +16,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GetRune/Character/GRCharacterMovementComponent.h"
 #include "GetRune/Data/SkillInfo.h"
+#include "GetRune/GameMode/GRGameMode.h"
+#include "GetRune/Item/Rune/GRRuneBase.h"
+#include "GetRune/Spawner/RuneSpawner.h"
 #include "GetRune/Subsystem/GRDataTableSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -69,6 +72,8 @@ void AGRPlayer::BeginPlay()
 		RuneCounts.Add(Entry->RuneType, 0);
 		RuneLastAcquired.Add(Entry->RuneType, 0);
 	}
+	
+	RuneSpawner = Cast<AGRGameMode>(GetWorld()->GetAuthGameMode())->RuneSpawnManager;
 }
 
 void AGRPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -124,19 +129,6 @@ void AGRPlayer::Input_Move(const FInputActionValue& InputActionValue)
 	if (!Controller) return;
 
 	const FVector2D Value = InputActionValue.Get<FVector2D>();
-
-	if (bIsAiming)
-	{
-		if (!Value.IsNearlyZero())
-		{
-			const FRotator CameraYaw(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
-			const FVector AimDir = (CameraYaw.RotateVector(FVector::RightVector) * Value.X
-								  + CameraYaw.RotateVector(FVector::ForwardVector) * Value.Y).GetSafeNormal();
-			SetActorRotation(AimDir.Rotation());
-		}
-		return;
-	}
-
 	const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
 	if (Value.X != 0.0f)
 	{
@@ -148,25 +140,21 @@ void AGRPlayer::Input_Move(const FInputActionValue& InputActionValue)
 	}
 }
 
-void AGRPlayer::AddRune(ERuneType RuneType)
+bool AGRPlayer::AddRune(ERuneType RuneType)
 {
+	if (TotalRuneCount >= RequiredRuneCount) return false;
+
 	int32* Count = RuneCounts.Find(RuneType);
-	if (!Count) return;
+	if (!Count) return false;
 
 	++(*Count);
 	++TotalRuneCount;
 	RuneLastAcquired[RuneType] = TotalRuneCount;
-
-	if (TotalRuneCount >= RequiredRuneCount)
-	{
-		Attack();
-	}
+	return true;
 }
 
 void AGRPlayer::Attack()
 {
-	LOG(TEXT("공격"))
-	
 	const int32 Tier = GetCurrentTier();
 	const ERuneType DominantType = GetDominantRuneType();
 
@@ -183,52 +171,23 @@ void AGRPlayer::Attack()
 	}
 	if (!SkillInfo) return;
 
+	CurrentDamage = SkillInfo->EnergyPerDamage * TotalRuneCount;
 	CurrentSkillInfo = SkillInfo;
-	CurrentSkillInfo->EnergyPerDamage *= TotalRuneCount;
-	
+
 	// 소유한 룬의 개수를 초기화합니다.
 	for (auto& Pair : RuneCounts) Pair.Value = 0;
 	for (auto& Pair : RuneLastAcquired) Pair.Value = 0;
 	TotalRuneCount = 0;
-	
+
 	FireSkill();
-	//StartAimPhase(SkillInfo->SkillType);
-}
-
-void AGRPlayer::StartAimPhase(ESkillType SkillType)
-{
-	bIsAiming = true;
-
-	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), SlowMoScale);
-	CustomTimeDilation = 1.0f / SlowMoScale;
-
-	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
-	{
-		ASC->SetLooseGameplayTagCount(TAG_Gameplay_OnlyRotation, 1);
-	}
-
-	const float Duration = (SkillType == ESkillType::Aim) ? AimDuration : InstantDuration;
-	GetWorldTimerManager().SetTimer(AimTimerHandle, this, &ThisClass::FireSkill, Duration * SlowMoScale, false);
 }
 
 void AGRPlayer::FireSkill()
 {
-	GetWorldTimerManager().ClearTimer(AimTimerHandle);
-
-	/*UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
-	CustomTimeDilation = 1.0f;*/
-
-	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
-	{
-		ASC->SetLooseGameplayTagCount(TAG_Gameplay_OnlyRotation, 0);
-	}
-
 	if (CurrentSkillInfo && CurrentSkillInfo->AttackMontage)
 	{
 		PlayAnimMontage(CurrentSkillInfo->AttackMontage);
 	}
-
-	bIsAiming = false;
 }
 
 int32 AGRPlayer::GetCurrentTier() const
@@ -271,12 +230,6 @@ ERuneType AGRPlayer::GetDominantRuneType() const
 
 void AGRPlayer::Input_MoveCompleted(const FInputActionValue& InputActionValue)
 {
-	if (bIsAiming)
-	{
-		FireSkill();
-		return;
-	}
-
 	if (TotalRuneCount > 0)
 	{
 		Attack();
@@ -285,16 +238,22 @@ void AGRPlayer::Input_MoveCompleted(const FInputActionValue& InputActionValue)
 
 void AGRPlayer::OnMagnetBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (IPickupable* Pickupable = Cast<IPickupable>(OtherActor))
+	if (AGRRuneBase* Rune = Cast<AGRRuneBase>(OtherActor))
 	{
-		Pickupable->OnMagnetOverlapped();
+		if (TotalRuneCount >= RequiredRuneCount) return;
+			
+		Rune->OnMagnetOverlapped();
 	}
 }
 
 void AGRPlayer::OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (IPickupable* Pickupable = Cast<IPickupable>(OtherActor))
+	if (AGRRuneBase* Rune = Cast<AGRRuneBase>(OtherActor))
 	{
-		Pickupable->OnPlayerOverlapped();
+		if (TotalRuneCount >= RequiredRuneCount) return;
+			
+		AddRune(Rune->RuneType);
+		Rune->OnPlayerOverlapped();
+		--RuneSpawner->SpawnedCount;
 	}
 }

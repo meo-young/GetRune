@@ -55,6 +55,14 @@ void AGREnemy::BeginPlay()
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AGREnemy::OnCapsuleBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &AGREnemy::OnCapsuleEndOverlap);
+
+	ASC->GetGameplayAttributeValueChangeDelegate(
+		UGRHealthSet::GetHealthAttribute()).AddUObject(this, &AGREnemy::OnHealthChanged);
+
+	if (const UGRHealthSet* HealthSet = ASC->GetSet<UGRHealthSet>())
+	{
+		HealthSet->OnOutOfHealth.AddUObject(this, &AGREnemy::HandleDeath);
+	}
 }
 
 void AGREnemy::PossessedBy(AController* NewController)
@@ -77,11 +85,9 @@ void AGREnemy::OnActivated()
 
 void AGREnemy::OnDeactivated()
 {
-	if (const UGRHealthSet* HealthSet = ASC->GetSet<UGRHealthSet>())
-	{
-		HealthSet->OnOutOfHealth.Remove(DeathDelegateHandle);
-	}
 	GetWorldTimerManager().ClearTimer(ContactCooldownHandle);
+	GetWorldTimerManager().ClearTimer(DamageReactionHandle);
+	GetMesh()->SetScalarParameterValueOnMaterials(FName("Damage.Reaction.Intensity"), 0.f);
 	CurrentEnemyInfo = nullptr;
 }
 
@@ -97,10 +103,6 @@ void AGREnemy::InitializeFromEnemyInfo(const UEnemyInfo* EnemyInfo)
 	ASC->SetNumericAttributeBase(UGRHealthSet::GetHealthAttribute(), EnemyInfo->Health);
 	ASC->SetNumericAttributeBase(UGRCharacterStatSet::GetAttackPowerAttribute(), EnemyInfo->AttackPower);
 
-	if (const UGRHealthSet* HealthSet = ASC->GetSet<UGRHealthSet>())
-	{
-		DeathDelegateHandle = HealthSet->OnOutOfHealth.AddUObject(this, &AGREnemy::HandleDeath);
-	}
 }
 
 void AGREnemy::HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplayEffectSpec* Spec, float Magnitude, float OldValue, float NewValue)
@@ -113,8 +115,23 @@ void AGREnemy::HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplay
 		}
 	}
 
+	//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetWorldTimerManager().ClearTimer(ContactCooldownHandle);
+
 	DropItems();
 
+	if (DeathMontage)
+	{
+		PlayAnimMontage(DeathMontage);
+	}
+	else
+	{
+		FinishDeath();
+	}
+}
+
+void AGREnemy::FinishDeath()
+{
 	UGRObjectPoolSubsystem* OPS = UGameplayStatics::GetGameInstance(this)->GetSubsystem<UGRObjectPoolSubsystem>();
 	OPS->ReleaseActor(this);
 }
@@ -151,9 +168,25 @@ void AGREnemy::ApplyContactDamage(UAbilitySystemComponent* PlayerASC)
 	FGameplayEffectSpecHandle Spec = ASC->MakeOutgoingSpec(ContactDamageGE, 1.f, Context);
 	if (Spec.IsValid())
 	{
-		Spec.Data->SetSetByCallerMagnitude(GRGameplayTags::SetByCaller_Damage, static_cast<float>(CurrentEnemyInfo->ContactDamage));
+		Spec.Data->SetSetByCallerMagnitude(GRGameplayTags::SetByCaller_Damage, CurrentEnemyInfo->ContactDamage);
 		ASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), PlayerASC);
 	}
+}
+
+void AGREnemy::OnHealthChanged(const FOnAttributeChangeData& Data)
+{
+	if (Data.NewValue < Data.OldValue)
+	{
+		GetMesh()->SetScalarParameterValueOnMaterials(FName("Damage.Reaction.Intensity"), 1.f);
+		GetWorldTimerManager().SetTimer(DamageReactionHandle, this, &AGREnemy::ResetDamageReaction, 0.2f, false);
+		GetMesh()->SetRelativeScale3D(FVector(0.7f, 1.0f, 1.1f));
+	}
+}
+
+void AGREnemy::ResetDamageReaction()
+{
+	GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+	GetMesh()->SetScalarParameterValueOnMaterials(FName("Damage.Reaction.Intensity"), 0.f);
 }
 
 void AGREnemy::DropItems() const

@@ -4,6 +4,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/Character.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "GetRune/Data/SkillInfo.h"
 #include "GetRune/GRGameplayTags.h"
@@ -125,10 +126,17 @@ void AGRProjectile::HandleOverlap(AActor* OtherActor)
 			FGameplayEffectSpecHandle Spec = SourceASC->MakeOutgoingSpec(DamageGE, 1.f, Context);
 			if (Spec.IsValid())
 			{
-				Spec.Data->SetSetByCallerMagnitude(GRGameplayTags::SetByCaller_Damage, Damage);
+				Spec.Data->SetSetByCallerMagnitude(GRGameplayTags::SetByCaller_Damage, Damage * 100.0f);
 				SourceASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), TargetASC);
 			}
 		}
+	}
+
+	// 넉백
+	if (ACharacter* HitCharacter = Cast<ACharacter>(OtherActor))
+	{
+		const FVector KnockbackDir = ProjectileMovement->Velocity.GetSafeNormal2D();
+		HitCharacter->LaunchCharacter(KnockbackDir * Damage, true, false);
 	}
 }
 

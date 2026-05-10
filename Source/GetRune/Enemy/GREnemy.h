@@ -37,6 +37,7 @@ public:
 // Member Function
 public:
 	void InitializeFromEnemyInfo(const UEnemyInfo* EnemyInfo);
+	void FinishDeath();
 	virtual void Attack() {}
 	virtual void OnAttackFinished() {}
 
@@ -56,6 +57,9 @@ private:
 	void ApplyContactDamage(UAbilitySystemComponent* PlayerASC);
 	void OnContactDamageTimer();
 
+	void OnHealthChanged(const FOnAttributeChangeData& Data);
+	void ResetDamageReaction();
+
 
 // Component
 protected:
@@ -72,16 +76,19 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "변수|GE")
 	TSubclassOf<UGameplayEffect> ContactDamageGE;
+
+	UPROPERTY(EditDefaultsOnly, Category = "변수|몽타주")
+	TObjectPtr<UAnimMontage> DeathMontage;
 	
 protected:
 	UPROPERTY()
 	const UEnemyInfo* CurrentEnemyInfo = nullptr;
 	
 	bool bCanAttack = true;
-	FDelegateHandle DeathDelegateHandle;
 	float AttackRange = 0.f;
-	
+
 	FTimerHandle ContactCooldownHandle;
+	FTimerHandle DamageReactionHandle;
 	TWeakObjectPtr<AGRPlayer> OverlappingPlayer;
 	
 public:

@@ -25,7 +25,7 @@ private:
 
 // Member Variable
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "변수|Combat")
+	UPROPERTY(EditDefaultsOnly, Category = "변수|몽타주")
 	TObjectPtr<UAnimMontage> AttackMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = "변수|Projectile")

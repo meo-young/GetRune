@@ -10,6 +10,9 @@ class UProjectileMovementComponent;
 class UGameplayEffect;
 class UAbilitySystemComponent;
 class UNiagaraComponent;
+class UNiagaraSystem;
+class USoundCue;
+class USkillInfo;
 
 UCLASS()
 class GETRUNE_API AGRProjectile : public AActor, public IPoolable
@@ -30,15 +33,18 @@ public:
 // Member Function
 public:
 	void Launch(const FVector& Direction, float InDamage, float InSpeed,
-	            TSubclassOf<UGameplayEffect> InDamageGE, UAbilitySystemComponent* InSourceASC);
+	            TSubclassOf<UGameplayEffect> InDamageGE, UAbilitySystemComponent* InSourceASC,
+	            USkillInfo* InSkillInfo = nullptr);
+
+protected:
+	virtual void HandleOverlap(AActor* OtherActor);
+	void ReturnToPool();
 
 private:
 	UFUNCTION()
 	void OnSphereOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	                     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	                     bool bFromSweep, const FHitResult& SweepResult);
-
-	void ReturnToPool();
 
 
 // Component
@@ -64,6 +70,12 @@ private:
 	TSubclassOf<UGameplayEffect> DamageGE;
 	float Damage = 0.f;
 	TWeakObjectPtr<UAbilitySystemComponent> SourceASC;
+
+	UPROPERTY()
+	TObjectPtr<UNiagaraSystem> CachedHitEffect;
+
+	UPROPERTY()
+	TObjectPtr<USoundCue> CachedHitSound;
 
 	FTimerHandle LifetimeHandle;
 

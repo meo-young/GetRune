@@ -13,6 +13,9 @@
 #include "GetRune/GetRune.h"
 #include "GetRune/GRGameplayTags.h"
 #include "GetRune/AbilitySystem/GRAbilitySystemComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GetRune/Character/GRCharacterMovementComponent.h"
+#include "GetRune/Data/SkillInfo.h"
 #include "GetRune/Subsystem/GRDataTableSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -56,6 +59,16 @@ void AGRPlayer::BeginPlay()
 	const FCharacterInfo* CharacterInfo = DTS->GetCharacterInfo(GetClass());
 	GetCharacterMovement()->MaxWalkSpeed = CharacterInfo->MoveSpeed;
 	MagnetCollision->SetSphereRadius(CharacterInfo->MagnetRadius);
+	RequiredRuneCount = CharacterInfo->RequiredRuneCount;
+
+	for (const FRuneSkillEntry* Entry : { &CharacterInfo->RuneSkillData_1,
+										   &CharacterInfo->RuneSkillData_2,
+										   &CharacterInfo->RuneSkillData_3 })
+	{
+		CachedSkillData.Add(Entry->RuneType, Entry->SkillTierData);
+		RuneCounts.Add(Entry->RuneType, 0);
+		RuneLastAcquired.Add(Entry->RuneType, 0);
+	}
 }
 
 void AGRPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -92,6 +105,7 @@ void AGRPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	
 	//IC->BindAbilityAction(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased);
 	IC->BindNativeAction(InputConfig, GRGameplayTags::InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
+	IC->BindNativeAction(InputConfig, GRGameplayTags::InputTag_Move, ETriggerEvent::Completed, this, &ThisClass::Input_MoveCompleted);
 	
 }
 
@@ -107,22 +121,164 @@ UAbilitySystemComponent* AGRPlayer::GetAbilitySystemComponent() const
 
 void AGRPlayer::Input_Move(const FInputActionValue& InputActionValue)
 {
-	if (Controller)
+	if (!Controller) return;
+
+	const FVector2D Value = InputActionValue.Get<FVector2D>();
+
+	if (bIsAiming)
 	{
-		const FVector2D Value = InputActionValue.Get<FVector2D>();
-		const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
-
-		if (Value.X != 0.0f)
+		if (!Value.IsNearlyZero())
 		{
-			const FVector MovementDirection = MovementRotation.RotateVector(FVector::RightVector);
-			AddMovementInput(MovementDirection, Value.X);
+			const FRotator CameraYaw(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
+			const FVector AimDir = (CameraYaw.RotateVector(FVector::RightVector) * Value.X
+								  + CameraYaw.RotateVector(FVector::ForwardVector) * Value.Y).GetSafeNormal();
+			SetActorRotation(AimDir.Rotation());
 		}
+		return;
+	}
 
-		if (Value.Y != 0.0f)
+	const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
+	if (Value.X != 0.0f)
+	{
+		AddMovementInput(MovementRotation.RotateVector(FVector::RightVector), Value.X);
+	}
+	if (Value.Y != 0.0f)
+	{
+		AddMovementInput(MovementRotation.RotateVector(FVector::ForwardVector), Value.Y);
+	}
+}
+
+void AGRPlayer::AddRune(ERuneType RuneType)
+{
+	int32* Count = RuneCounts.Find(RuneType);
+	if (!Count) return;
+
+	++(*Count);
+	++TotalRuneCount;
+	RuneLastAcquired[RuneType] = TotalRuneCount;
+
+	if (TotalRuneCount >= RequiredRuneCount)
+	{
+		Attack();
+	}
+}
+
+void AGRPlayer::Attack()
+{
+	LOG(TEXT("공격"))
+	
+	const int32 Tier = GetCurrentTier();
+	const ERuneType DominantType = GetDominantRuneType();
+
+	// 발동할 스킬 정보를 탐색합니다.
+	const FSkillTierData* TierData = CachedSkillData.Find(DominantType);
+	if (!TierData) return;
+
+	USkillInfo* SkillInfo = nullptr;
+	switch (Tier)
+	{
+		case 1:  SkillInfo = TierData->SkillTier_1; break;
+		case 2:  SkillInfo = TierData->SkillTier_2; break;
+		default: SkillInfo = TierData->SkillTier_3; break;
+	}
+	if (!SkillInfo) return;
+
+	CurrentSkillInfo = SkillInfo;
+	CurrentSkillInfo->EnergyPerDamage *= TotalRuneCount;
+	
+	// 소유한 룬의 개수를 초기화합니다.
+	for (auto& Pair : RuneCounts) Pair.Value = 0;
+	for (auto& Pair : RuneLastAcquired) Pair.Value = 0;
+	TotalRuneCount = 0;
+	
+	StartAimPhase(SkillInfo->SkillType);
+}
+
+void AGRPlayer::StartAimPhase(ESkillType SkillType)
+{
+	bIsAiming = true;
+
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), SlowMoScale);
+	CustomTimeDilation = 1.0f / SlowMoScale;
+
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		ASC->SetLooseGameplayTagCount(TAG_Gameplay_OnlyRotation, 1);
+	}
+
+	const float Duration = (SkillType == ESkillType::Aim) ? AimDuration : InstantDuration;
+	GetWorldTimerManager().SetTimer(AimTimerHandle, this, &ThisClass::FireSkill, Duration * SlowMoScale, false);
+}
+
+void AGRPlayer::FireSkill()
+{
+	GetWorldTimerManager().ClearTimer(AimTimerHandle);
+
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+	CustomTimeDilation = 1.0f;
+
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		ASC->SetLooseGameplayTagCount(TAG_Gameplay_OnlyRotation, 0);
+	}
+
+	if (CurrentSkillInfo && CurrentSkillInfo->AttackMontage)
+	{
+		PlayAnimMontage(CurrentSkillInfo->AttackMontage);
+	}
+
+	bIsAiming = false;
+}
+
+int32 AGRPlayer::GetCurrentTier() const
+{
+	const int32 Tier1Max = RequiredRuneCount / 3;
+	const int32 Tier2Max = RequiredRuneCount * 2 / 3;
+
+	if (TotalRuneCount <= Tier1Max) return 1;
+	if (TotalRuneCount <= Tier2Max) return 2;
+	return 3;
+}
+
+ERuneType AGRPlayer::GetDominantRuneType() const
+{
+	// 최다 개수 탐색
+	int32 MaxCount = 0;
+	for (const auto& Pair : RuneCounts)
+	{
+		MaxCount = FMath::Max(MaxCount, Pair.Value);
+	}
+
+	// 최다 타입 중 가장 최근에 획득한 타입 선택
+	int32 LatestOrder = -1;
+	ERuneType DominantType = RuneCounts.begin()->Key;
+	for (const auto& Pair : RuneCounts)
+	{
+		if (Pair.Value == MaxCount)
 		{
-			const FVector MovementDirection = MovementRotation.RotateVector(FVector::ForwardVector);
-			AddMovementInput(MovementDirection, Value.Y);
+			const int32 Order = RuneLastAcquired[Pair.Key];
+			if (Order > LatestOrder)
+			{
+				LatestOrder = Order;
+				DominantType = Pair.Key;
+			}
 		}
+	}
+
+	return DominantType;
+}
+
+void AGRPlayer::Input_MoveCompleted(const FInputActionValue& InputActionValue)
+{
+	if (bIsAiming)
+	{
+		FireSkill();
+		return;
+	}
+
+	if (TotalRuneCount > 0)
+	{
+		Attack();
 	}
 }
 

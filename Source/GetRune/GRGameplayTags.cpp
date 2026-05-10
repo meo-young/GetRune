@@ -10,6 +10,8 @@ namespace GRGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(SetByCaller_Damage, "SetByCaller.Damage");
 	UE_DEFINE_GAMEPLAY_TAG(SetByCaller_Heal, "SetByCaller.Heal");
 
+	UE_DEFINE_GAMEPLAY_TAG(Ability_Attack, "Ability.Attack");
+	
 	const TMap<uint8, FGameplayTag> MovementModeTagMap =
 	{
 		{ MOVE_Walking, Movement_Mode_Walking },

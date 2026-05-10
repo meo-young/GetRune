@@ -1,12 +1,15 @@
 #include "GRProjectile.h"
 #include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "GetRune/Data/SkillInfo.h"
 #include "GetRune/GRGameplayTags.h"
-#include "GetRune/Player/GRPlayer.h"
 #include "GetRune/Subsystem/GRObjectPoolSubsystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 AGRProjectile::AGRProjectile()
 {
@@ -61,17 +64,33 @@ void AGRProjectile::OnDeactivated()
 	GetWorldTimerManager().ClearTimer(LifetimeHandle);
 	ProjectileMovement->StopMovementImmediately();
 	ProjectileMovement->Deactivate();
+	ProjectileEffect->Deactivate();
+	ProjectileEffect->SetAsset(nullptr);
 	DamageGE = nullptr;
 	SourceASC = nullptr;
 	Damage = 0.f;
+	CachedHitEffect = nullptr;
+	CachedHitSound = nullptr;
 }
 
 void AGRProjectile::Launch(const FVector& Direction, float InDamage, float InSpeed,
-                            TSubclassOf<UGameplayEffect> InDamageGE, UAbilitySystemComponent* InSourceASC)
+                            TSubclassOf<UGameplayEffect> InDamageGE, UAbilitySystemComponent* InSourceASC,
+                            USkillInfo* InSkillInfo)
 {
 	DamageGE = InDamageGE;
 	Damage = InDamage;
 	SourceASC = InSourceASC;
+
+	if (InSkillInfo)
+	{
+		if (InSkillInfo->ProjectileEffect.Effect)
+		{
+			ProjectileEffect->SetAsset(InSkillInfo->ProjectileEffect.Effect);
+			ProjectileEffect->Activate(true);
+		}
+		CachedHitEffect = InSkillInfo->HitEffect.Effect;
+		CachedHitSound  = InSkillInfo->HitEffect.Sound;
+	}
 
 	const FVector NormalDir = Direction.GetSafeNormal();
 	SetActorRotation(NormalDir.Rotation());
@@ -81,21 +100,36 @@ void AGRProjectile::Launch(const FVector& Direction, float InDamage, float InSpe
 
 void AGRProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	const AGRPlayer* Player = Cast<AGRPlayer>(OtherActor);
-	if (!Player || !SourceASC.IsValid() || !DamageGE) return;
+	HandleOverlap(OtherActor);
+}
 
-	UAbilitySystemComponent* PlayerASC = Player->GetAbilitySystemComponent();
-	if (!PlayerASC) return;
-
-	FGameplayEffectContextHandle Context = SourceASC->MakeEffectContext();
-	FGameplayEffectSpecHandle Spec = SourceASC->MakeOutgoingSpec(DamageGE, 1.f, Context);
-	if (Spec.IsValid())
+void AGRProjectile::HandleOverlap(AActor* OtherActor)
+{
+	// 피격 이펙트 재생
+	if (CachedHitEffect)
 	{
-		Spec.Data->SetSetByCallerMagnitude(GRGameplayTags::SetByCaller_Damage, Damage);
-		SourceASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), PlayerASC);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), CachedHitEffect, GetActorLocation());
+	}
+	if (CachedHitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, CachedHitSound, GetActorLocation());
 	}
 
-	ReturnToPool();
+	// 데미지 적용
+	if (SourceASC.IsValid() && DamageGE)
+	{
+		UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OtherActor);
+		if (TargetASC)
+		{
+			FGameplayEffectContextHandle Context = SourceASC->MakeEffectContext();
+			FGameplayEffectSpecHandle Spec = SourceASC->MakeOutgoingSpec(DamageGE, 1.f, Context);
+			if (Spec.IsValid())
+			{
+				Spec.Data->SetSetByCallerMagnitude(GRGameplayTags::SetByCaller_Damage, Damage);
+				SourceASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), TargetASC);
+			}
+		}
+	}
 }
 
 void AGRProjectile::ReturnToPool()

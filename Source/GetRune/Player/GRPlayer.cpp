@@ -191,7 +191,8 @@ void AGRPlayer::Attack()
 	for (auto& Pair : RuneLastAcquired) Pair.Value = 0;
 	TotalRuneCount = 0;
 	
-	StartAimPhase(SkillInfo->SkillType);
+	FireSkill();
+	//StartAimPhase(SkillInfo->SkillType);
 }
 
 void AGRPlayer::StartAimPhase(ESkillType SkillType)
@@ -214,8 +215,8 @@ void AGRPlayer::FireSkill()
 {
 	GetWorldTimerManager().ClearTimer(AimTimerHandle);
 
-	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
-	CustomTimeDilation = 1.0f;
+	/*UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
+	CustomTimeDilation = 1.0f;*/
 
 	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
 	{

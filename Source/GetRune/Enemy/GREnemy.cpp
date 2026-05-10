@@ -74,6 +74,9 @@ void AGREnemy::PossessedBy(AController* NewController)
 
 void AGREnemy::OnActivated()
 {
+	ASC->SetLooseGameplayTagCount(GRGameplayTags::Status_Death, 0);
+	GetCharacterMovement()->bUseRVOAvoidance = true;
+	
 	if (AAIController* AIC = GetController<AAIController>())
 	{
 		if (UBrainComponent* Brain = AIC->GetBrainComponent())
@@ -114,20 +117,13 @@ void AGREnemy::HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplay
 			Brain->StopLogic("Death");
 		}
 	}
+	
+	ASC->SetLooseGameplayTagCount(GRGameplayTags::Status_Death, 1);
 
-	//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->bUseRVOAvoidance = false;
 	GetWorldTimerManager().ClearTimer(ContactCooldownHandle);
 
 	DropItems();
-
-	if (DeathMontage)
-	{
-		PlayAnimMontage(DeathMontage);
-	}
-	else
-	{
-		FinishDeath();
-	}
 }
 
 void AGREnemy::FinishDeath()

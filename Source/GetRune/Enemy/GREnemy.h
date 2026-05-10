@@ -76,9 +76,6 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "변수|GE")
 	TSubclassOf<UGameplayEffect> ContactDamageGE;
-
-	UPROPERTY(EditDefaultsOnly, Category = "변수|몽타주")
-	TObjectPtr<UAnimMontage> DeathMontage;
 	
 protected:
 	UPROPERTY()

@@ -41,7 +41,9 @@ void UAnimNotify_PlayerAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSeq
 		}
 		if (NearestEnemy)
 		{
-			LaunchDirection = (NearestEnemy->GetActorLocation() - Player->GetActorLocation()).GetSafeNormal();
+			FVector ToEnemy = NearestEnemy->GetActorLocation() - Player->GetActorLocation();
+			ToEnemy.Z = 0.f;
+			LaunchDirection = ToEnemy.GetSafeNormal();
 		}
 	}
 

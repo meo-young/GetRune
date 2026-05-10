@@ -1,5 +1,6 @@
 ﻿#include "GRAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GetRune/AbilitySystem/GRAbilitySystemComponent.h"
 #include "GetRune/Character/GRCharacter.h"
 
 UGRAnimInstance::UGRAnimInstance()
@@ -23,6 +24,8 @@ void UGRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Super::NativeUpdateAnimation(DeltaSeconds);
 	
 	if (!Character || !MovementComponent) return;
+	
+	ASC = Cast<UGRAbilitySystemComponent>(Character->GetAbilitySystemComponent());
 	
 	const float Velocity = Character->GetVelocity().Length();
 	

@@ -16,4 +16,6 @@ namespace GRGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(SetByCaller_Heal);
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Attack);
+	
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Status_Death);
 }

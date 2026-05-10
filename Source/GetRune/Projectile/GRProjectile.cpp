@@ -45,7 +45,7 @@ AGRProjectile::AGRProjectile()
 		ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 		ProjectileMovement->InitialSpeed = 0.f;
 		ProjectileMovement->MaxSpeed = 5000.f;
-		ProjectileMovement->bRotationFollowsVelocity = true;
+		ProjectileMovement->bRotationFollowsVelocity = false;
 		ProjectileMovement->ProjectileGravityScale = 0.f;
 		ProjectileMovement->SetAutoActivate(false);
 	}
@@ -94,7 +94,10 @@ void AGRProjectile::Launch(const FVector& Direction, float InDamage, float InSpe
 	}
 
 	const FVector NormalDir = Direction.GetSafeNormal();
-	SetActorRotation(NormalDir.Rotation());
+	FRotator LaunchRotation = NormalDir.Rotation();
+	LaunchRotation.Pitch = 0.f;
+	LaunchRotation.Roll = 0.f;
+	SetActorRotation(LaunchRotation);
 	ProjectileMovement->Velocity = NormalDir * InSpeed;
 	ProjectileMovement->Activate();
 }
@@ -126,7 +129,7 @@ void AGRProjectile::HandleOverlap(AActor* OtherActor)
 			FGameplayEffectSpecHandle Spec = SourceASC->MakeOutgoingSpec(DamageGE, 1.f, Context);
 			if (Spec.IsValid())
 			{
-				Spec.Data->SetSetByCallerMagnitude(GRGameplayTags::SetByCaller_Damage, Damage * 100.0f);
+				Spec.Data->SetSetByCallerMagnitude(GRGameplayTags::SetByCaller_Damage, Damage);
 				SourceASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), TargetASC);
 			}
 		}

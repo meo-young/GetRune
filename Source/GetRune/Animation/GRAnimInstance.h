@@ -4,6 +4,7 @@
 #include "Animation/AnimInstance.h"
 #include "GRAnimInstance.generated.h"
 
+class UGRAbilitySystemComponent;
 class UCharacterMovementComponent;
 class AGRCharacter;
 
@@ -32,4 +33,7 @@ private:
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float MoveSpeedRatio;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	TObjectPtr<UGRAbilitySystemComponent> ASC;
 };

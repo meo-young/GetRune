@@ -5,6 +5,7 @@
 #include "GetRune/Data/CharacterInfo.h"
 #include "GRPlayer.generated.h"
 
+class UIndicatorComponent;
 class URuneSpawner;
 class USphereComponent;
 struct FInputActionValue;
@@ -65,6 +66,9 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USphereComponent> MagnetCollision;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UIndicatorComponent> IndicatorComponent;
 	
 	
 // Input Variable

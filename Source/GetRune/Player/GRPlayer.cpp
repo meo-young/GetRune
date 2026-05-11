@@ -24,6 +24,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "MotionWarpingComponent.h"
+#include "GetRune/Component/IndicatorComponent.h"
 #include "GetRune/Enemy/GREnemy.h"
 
 AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -50,6 +51,12 @@ AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(Object
 		MagnetCollision = CreateDefaultSubobject<USphereComponent>(TEXT("MagnetCollision"));
 		MagnetCollision->SetupAttachment(GetMesh());
 		MagnetCollision->SetCollisionProfileName(TEXT("Magnet"));
+	}
+	
+	// IndicatorComponent 설정
+	{
+		IndicatorComponent = CreateDefaultSubobject<UIndicatorComponent>(TEXT("IndicatorComponent"));
+		IndicatorComponent->SetupAttachment(GetMesh());
 	}
 }
 

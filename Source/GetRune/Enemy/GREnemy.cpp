@@ -122,6 +122,8 @@ void AGREnemy::InitializeFromEnemyInfo(const UEnemyInfo* EnemyInfo)
 
 void AGREnemy::HandleDeath(UHealthComponent* HC, float OldValue, float NewValue, AActor* InInstigator)
 {
+	StopAnimMontage();
+
 	if (AAIController* AIC = GetController<AAIController>())
 	{
 		if (UBrainComponent* Brain = AIC->GetBrainComponent())

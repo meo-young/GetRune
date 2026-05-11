@@ -21,7 +21,8 @@ public class GetRune : ModuleRules
 			"AIModule",
 			"NavigationSystem",
 			"Niagara",
-				"UMG"
+			"UMG",
+			"MotionWarping"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

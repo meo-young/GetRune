@@ -10,5 +10,9 @@ class GETRUNE_API AGRProjectilePiercing : public AGRProjectile
 	GENERATED_BODY()
 
 protected:
+	virtual void OnActivated() override;
 	virtual void HandleOverlap(AActor* OtherActor) override;
+
+private:
+	TSet<TWeakObjectPtr<AActor>> HitActors;
 };

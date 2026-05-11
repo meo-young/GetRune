@@ -1,5 +1,6 @@
 #include "GRRangedEnemy.h"
 #include "GameFramework/Character.h"
+#include "MotionWarpingComponent.h"
 #include "GetRune/Data/StageInfo.h"
 #include "GetRune/Projectile/GRProjectile.h"
 #include "GetRune/Subsystem/GRObjectPoolSubsystem.h"
@@ -8,6 +9,12 @@
 void AGRRangedEnemy::Attack()
 {
 	if (!bCanAttack || !AttackMontage) return;
+
+	if (APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0))
+	{
+		MotionWarpingComponent->AddOrUpdateWarpTargetFromComponent(
+			TEXT("AttackTarget"), Player->GetRootComponent(), NAME_None, true);
+	}
 
 	PlayAnimMontage(AttackMontage);
 }

@@ -6,6 +6,7 @@
 #include "GRCharacter.generated.h"
 
 class UHealthComponent;
+class UMotionWarpingComponent;
 struct FGameplayEffectSpec;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeath);
 
@@ -47,5 +48,8 @@ protected:
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UHealthComponent> HealthComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UMotionWarpingComponent> MotionWarpingComponent;
 
 };

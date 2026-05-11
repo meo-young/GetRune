@@ -35,6 +35,7 @@ public:
 	bool AddRune(ERuneType RuneType);
 	USkillInfo* GetCurrentSkillInfo() const { return CurrentSkillInfo; }
 	float GetCurrentDamage() const { return CurrentDamage; }
+	AActor* FindNearestEnemy(float Radius) const;
 
 private:
 	void Attack();

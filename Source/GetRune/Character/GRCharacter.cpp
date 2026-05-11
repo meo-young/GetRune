@@ -3,11 +3,13 @@
 #include "GetRune/GRGameplayTags.h"
 #include "GetRune/AbilitySystem/GRAbilitySystemComponent.h"
 #include "GetRune/Component/HealthComponent.h"
+#include "MotionWarpingComponent.h"
 
 AGRCharacter::AGRCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UGRCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	MotionWarpingComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarpingComponent"));
 }
 
 void AGRCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)

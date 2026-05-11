@@ -22,6 +22,9 @@
 #include "GetRune/Spawner/RuneSpawner.h"
 #include "GetRune/Subsystem/GRDataTableSubsystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "MotionWarpingComponent.h"
+#include "GetRune/Enemy/GREnemy.h"
 
 AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -190,10 +193,36 @@ void AGRPlayer::Attack()
 
 void AGRPlayer::FireSkill()
 {
-	if (CurrentSkillInfo && CurrentSkillInfo->AttackMontage)
+	if (!CurrentSkillInfo || !CurrentSkillInfo->AttackMontage) return;
+
+	if (AActor* NearestEnemy = FindNearestEnemy(2000.f))
 	{
-		PlayAnimMontage(CurrentSkillInfo->AttackMontage);
+		MotionWarpingComponent->AddOrUpdateWarpTargetFromComponent(
+			TEXT("AttackTarget"), NearestEnemy->GetRootComponent(), NAME_None, true);
 	}
+
+	PlayAnimMontage(CurrentSkillInfo->AttackMontage);
+}
+
+AActor* AGRPlayer::FindNearestEnemy(float Radius) const
+{
+	TArray<AActor*> OverlappedActors;
+	UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetActorLocation(),
+		Radius, TArray<TEnumAsByte<EObjectTypeQuery>>(), AGREnemy::StaticClass(),
+		TArray<AActor*>(), OverlappedActors);
+
+	AActor* NearestEnemy = nullptr;
+	float MinDistSq = FLT_MAX;
+	for (AActor* Actor : OverlappedActors)
+	{
+		const float DistSq = FVector::DistSquared(GetActorLocation(), Actor->GetActorLocation());
+		if (DistSq < MinDistSq)
+		{
+			MinDistSq = DistSq;
+			NearestEnemy = Actor;
+		}
+	}
+	return NearestEnemy;
 }
 
 int32 AGRPlayer::GetCurrentTier() const

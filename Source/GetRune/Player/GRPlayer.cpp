@@ -17,6 +17,7 @@
 #include "GetRune/Character/GRCharacterMovementComponent.h"
 #include "GetRune/Data/SkillInfo.h"
 #include "GetRune/GameState/GRGameState.h"
+#include "GetRune/Component/HealthComponent.h"
 #include "GetRune/Item/Rune/GRRuneBase.h"
 #include "GetRune/Spawner/RuneSpawner.h"
 #include "GetRune/Subsystem/GRDataTableSubsystem.h"
@@ -74,6 +75,11 @@ void AGRPlayer::BeginPlay()
 	}
 	
 	RuneSpawner = GetWorld()->GetGameState<AGRGameState>()->RuneSpawnManager;
+
+	if (UGRAbilitySystemComponent* ASC = Cast<UGRAbilitySystemComponent>(GetAbilitySystemComponent()))
+	{
+		HealthComponent->InitializeWithAbilitySystem(ASC);
+	}
 }
 
 void AGRPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

@@ -6,6 +6,8 @@
 #include "GetRune/Interface/Poolable.h"
 #include "GREnemy.generated.h"
 
+class UWidgetComponent;
+class UGREnemyStatusWidget;
 class AGRPlayer;
 class UEnemyInfo;
 class UGameplayEffect;
@@ -42,8 +44,8 @@ public:
 	virtual void OnAttackFinished() {}
 
 protected:
-	virtual void HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplayEffectSpec* Spec, float Magnitude, float OldValue, float NewValue) override;
-	virtual void OnHealthChanged(const FOnAttributeChangeData& Data) override;
+	virtual void HandleDeath(UHealthComponent* HC, float OldValue, float NewValue, AActor* InInstigator) override;
+	virtual void OnHealthChanged(UHealthComponent* HC, float OldValue, float NewValue, AActor* InInstigator) override;
 
 	
 private:
@@ -66,8 +68,11 @@ private:
 
 // Component
 protected:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UGRAbilitySystemComponent> ASC;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UWidgetComponent> StatusWidget;
 
 
 // Getter
@@ -79,6 +84,9 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "변수|GE")
 	TSubclassOf<UGameplayEffect> ContactDamageGE;
+	
+	UPROPERTY()
+	TObjectPtr<UGREnemyStatusWidget> EnemyStatusWidgetInstance;
 	
 protected:
 	UPROPERTY()

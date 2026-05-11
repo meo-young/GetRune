@@ -1,15 +1,16 @@
 #include "GREnemy.h"
-
 #include "AIController.h"
 #include "BrainComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayEffect.h"
+#include "Components/WidgetComponent.h"
 #include "GetRune/GetRune.h"
 #include "GetRune/AbilitySystem/GRAbilitySystemComponent.h"
 #include "GetRune/AbilitySystem/Attributes/GRCombatSet.h"
 #include "GetRune/AbilitySystem/Attributes/GRCharacterStatSet.h"
 #include "GetRune/AbilitySystem/Attributes/GRHealthSet.h"
+#include "GetRune/Component/HealthComponent.h"
 #include "GetRune/Data/StageInfo.h"
 #include "GetRune/GRGameplayTags.h"
 #include "GetRune/GameState/GRGameState.h"
@@ -19,6 +20,7 @@
 #include "GetRune/Subsystem/GRObjectPoolSubsystem.h"
 #include "GetRune/UI/GREnemyCounterWidget.h"
 #include "GetRune/UI/GRHUD.h"
+#include "GetRune/UI/GREnemyStatusWidget.h"
 #include "Kismet/GameplayStatics.h"
 
 AGREnemy::AGREnemy()
@@ -50,6 +52,13 @@ AGREnemy::AGREnemy()
 	// 회전 속성을 설정합니다.
 	{
 		bUseControllerRotationYaw = false;
+	}
+	
+	// StatusWidget을 설정합니다.
+	{
+		StatusWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("StatusWidget"));
+		StatusWidget->SetupAttachment(GetRootComponent());
+		StatusWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	}
 }
 
@@ -88,6 +97,7 @@ void AGREnemy::OnDeactivated()
 	GetWorldTimerManager().ClearTimer(DamageReactionHandle);
 	GetMesh()->SetScalarParameterValueOnMaterials(FName("Damage.Reaction.Intensity"), 0.f);
 	CurrentEnemyInfo = nullptr;
+	HealthComponent->UninitializeWithAbilitySystem();
 }
 
 void AGREnemy::InitializeFromEnemyInfo(const UEnemyInfo* EnemyInfo)
@@ -102,9 +112,20 @@ void AGREnemy::InitializeFromEnemyInfo(const UEnemyInfo* EnemyInfo)
 	ASC->SetNumericAttributeBase(UGRHealthSet::GetHealthAttribute(), EnemyInfo->Health);
 	ASC->SetNumericAttributeBase(UGRCharacterStatSet::GetAttackPowerAttribute(), EnemyInfo->AttackPower);
 
+	HealthComponent->InitializeWithAbilitySystem(ASC);
+
+	if (!EnemyStatusWidgetInstance)
+	{
+		EnemyStatusWidgetInstance = Cast<UGREnemyStatusWidget>(StatusWidget->GetUserWidgetObject());
+	}
+	
+	if (EnemyStatusWidgetInstance)
+	{
+		EnemyStatusWidgetInstance->SetHealthRatio(1.f);
+	}
 }
 
-void AGREnemy::HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplayEffectSpec* Spec, float Magnitude, float OldValue, float NewValue)
+void AGREnemy::HandleDeath(UHealthComponent* HC, float OldValue, float NewValue, AActor* InInstigator)
 {
 	if (AAIController* AIC = GetController<AAIController>())
 	{
@@ -113,17 +134,17 @@ void AGREnemy::HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplay
 			Brain->StopLogic("Death");
 		}
 	}
-	
+
 	ASC->SetLooseGameplayTagCount(GRGameplayTags::Status_Death, 1);
 
 	GetCharacterMovement()->bUseRVOAvoidance = false;
 	GetWorldTimerManager().ClearTimer(ContactCooldownHandle);
-	
+
 	GetWorld()->GetGameState<AGRGameState>()->EnemySpawnManager->DecrementEnemyNum();
 
 	DropItems();
-	
-	Super::HandleDeath(InInstigator, Causer, Spec, Magnitude, OldValue, NewValue);
+
+	Super::HandleDeath(HC, OldValue, NewValue, InInstigator);
 }
 
 void AGREnemy::FinishDeath()
@@ -169,13 +190,18 @@ void AGREnemy::ApplyContactDamage(UAbilitySystemComponent* PlayerASC)
 	}
 }
 
-void AGREnemy::OnHealthChanged(const FOnAttributeChangeData& Data)
+void AGREnemy::OnHealthChanged(UHealthComponent* HC, float OldValue, float NewValue, AActor* InInstigator)
 {
-	if (Data.NewValue < Data.OldValue)
+	if (NewValue < OldValue)
 	{
 		GetMesh()->SetScalarParameterValueOnMaterials(FName("Damage.Reaction.Intensity"), 1.f);
 		GetWorldTimerManager().SetTimer(DamageReactionHandle, this, &AGREnemy::ResetDamageReaction, 0.2f, false);
 		GetMesh()->SetRelativeScale3D(FVector(0.7f, 1.0f, 1.1f));
+
+		if (EnemyStatusWidgetInstance)
+		{
+			EnemyStatusWidgetInstance->SetHealthRatio(HC->GetHealthNormalized());
+		}
 	}
 }
 

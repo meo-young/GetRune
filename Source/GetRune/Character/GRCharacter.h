@@ -5,7 +5,7 @@
 #include "AbilitySystemInterface.h"
 #include "GRCharacter.generated.h"
 
-struct FOnAttributeChangeData;
+class UHealthComponent;
 struct FGameplayEffectSpec;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeath);
 
@@ -32,11 +32,20 @@ public:
 	FOnCharacterDeath OnCharacterDeath;
 	
 	
-// Member Function	
+// Member Function
 protected:
-	virtual void HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplayEffectSpec* Spec, float Magnitude, float OldValue, float NewValue);
-	virtual void OnHealthChanged(const FOnAttributeChangeData& Data);
+	UFUNCTION()
+	virtual void HandleDeath(UHealthComponent* HC, float OldValue, float NewValue, AActor* InInstigator);
+
+	UFUNCTION()
+	virtual void OnHealthChanged(UHealthComponent* HC, float OldValue, float NewValue, AActor* InInstigator);
+
 	void SetMovementModeTag(EMovementMode CurrentMovementMode, uint8 CurrentCustomMode, bool bTagEnabled);
 
-	
+
+// Component
+protected:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UHealthComponent> HealthComponent;
+
 };

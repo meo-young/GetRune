@@ -21,10 +21,11 @@ public:
 	URuneSpawner();
 	
 
-// Member Function	
+// Member Function
 public:
 	virtual void Initialize() override;
 	virtual void Spawn() override;
+	const URuneInfo* GetRuneData() const { return RuneData; }
 	
 	
 private:

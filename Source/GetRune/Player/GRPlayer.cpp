@@ -20,15 +20,24 @@
 #include "GetRune/Component/HealthComponent.h"
 #include "GetRune/Item/Rune/GRRuneBase.h"
 #include "GetRune/Spawner/RuneSpawner.h"
+#include "GetRune/Data/RuneInfo.h"
 #include "GetRune/Subsystem/GRDataTableSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "MotionWarpingComponent.h"
 #include "GetRune/Component/IndicatorComponent.h"
 #include "GetRune/Enemy/GREnemy.h"
+#include "NiagaraFunctionLibrary.h"
 
 AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	// 이동 관련 설정
+	{
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		GetCharacterMovement()->MaxAcceleration = 4096.0f;
+	}
+	
 	// CapsuleComponent 설정
 	{
 		GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
@@ -38,6 +47,9 @@ AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(Object
 	{
 		SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 		SpringArmComponent->SetupAttachment(RootComponent);
+		SpringArmComponent->SetUsingAbsoluteRotation(true);
+		SpringArmComponent->TargetArmLength = 1600.0f;
+		SpringArmComponent->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
 	}
 	
 	// CameraComponent 설정
@@ -191,6 +203,15 @@ void AGRPlayer::Attack()
 
 	CurrentDamage = SkillInfo->EnergyPerDamage * TotalRuneCount;
 	CurrentSkillInfo = SkillInfo;
+	LastAttackTier = Tier;
+
+	if (const URuneInfo* RuneInfo = RuneSpawner->GetRuneData())
+	{
+		if (const FRuneClassData* RuneClassData = RuneInfo->RuneClass.Find(DominantType))
+		{
+			CurrentAttackEffect = RuneClassData->AttackEffect;
+		}
+	}
 
 	// 소유한 룬의 개수를 초기화합니다.
 	for (auto& Pair : RuneCounts) Pair.Value = 0;
@@ -204,6 +225,13 @@ void AGRPlayer::Attack()
 void AGRPlayer::FireSkill()
 {
 	if (!CurrentSkillInfo || !CurrentSkillInfo->AttackMontage) return;
+
+	if (CurrentAttackEffect)
+	{
+		const float Scale = 1.f + (LastAttackTier - 1) * 0.5f;
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), CurrentAttackEffect,
+			GetActorLocation(), FRotator::ZeroRotator, FVector(Scale));
+	}
 
 	if (AActor* NearestEnemy = FindNearestEnemy(2000.f))
 	{

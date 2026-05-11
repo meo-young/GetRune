@@ -9,6 +9,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRuneCountChanged, int32, Current
 
 class UIndicatorComponent;
 class URuneSpawner;
+class UNiagaraSystem;
 class USphereComponent;
 struct FInputActionValue;
 class UGRInputConfig;
@@ -44,6 +45,8 @@ public:
 	USkillInfo* GetCurrentSkillInfo() const { return CurrentSkillInfo; }
 	float GetCurrentDamage() const { return CurrentDamage; }
 	AActor* FindNearestEnemy(float Radius) const;
+	UNiagaraSystem* GetCurrentAttackEffect() const { return CurrentAttackEffect; }
+	int32 GetLastAttackTier() const { return LastAttackTier; }
 
 private:
 	void Attack();
@@ -103,6 +106,10 @@ private:
 	TMap<ERuneType, int32> RuneLastAcquired;
 	int32 TotalRuneCount = 0;
 	int32 RequiredRuneCount = 0;
+
+	UPROPERTY()
+	TObjectPtr<UNiagaraSystem> CurrentAttackEffect;
+	int32 LastAttackTier = 1;
 	
 	
 };

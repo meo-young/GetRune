@@ -38,9 +38,9 @@ void URuneSpawner::Initialize()
 		for (ERuneType RuneType : AllowedRuneTypes)
 		{
 			const int32 RunePerMaxSize = RuneData->MaxRuneCount/AllowedRuneTypes.Num();
-			const TSubclassOf<AGRRuneBase>* RuneClass = RuneData->RuneClass.Find(RuneType);
-			
-			Pool->InitializePools(*RuneClass, RunePerMaxSize);
+			const FRuneClassData* RuneClassData = RuneData->RuneClass.Find(RuneType);
+
+			Pool->InitializePools(RuneClassData->RuneClass, RunePerMaxSize);
 		}
 	}
 
@@ -61,11 +61,11 @@ void URuneSpawner::Spawn()
 	const ERuneType RuneType = AllowedRuneTypes[FMath::RandRange(0, AllowedRuneTypes.Num() - 1)];
 
 	// 선택한 타입에 해당하는 룬 클래스를 조회합니다.
-	const TSubclassOf<AGRRuneBase>* RuneClass = RuneData->RuneClass.Find(RuneType);
-	if (!RuneClass || !*RuneClass) return;
+	const FRuneClassData* RuneClassData = RuneData->RuneClass.Find(RuneType);
+	if (!RuneClassData || !RuneClassData->RuneClass) return;
 
 	// 풀에서 룬을 꺼내 무작위 위치에 배치합니다.
-	Pool->AcquireActor(*RuneClass, GetRandomSpawnLocation(), FRotator::ZeroRotator);
+	Pool->AcquireActor(RuneClassData->RuneClass, GetRandomSpawnLocation(), FRotator::ZeroRotator);
 	++SpawnedCount;
 }
 

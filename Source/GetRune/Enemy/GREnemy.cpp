@@ -113,13 +113,8 @@ void AGREnemy::InitializeFromEnemyInfo(const UEnemyInfo* EnemyInfo)
 	ASC->SetNumericAttributeBase(UGRCharacterStatSet::GetAttackPowerAttribute(), EnemyInfo->AttackPower);
 
 	HealthComponent->InitializeWithAbilitySystem(ASC);
-
-	if (!EnemyStatusWidgetInstance)
-	{
-		EnemyStatusWidgetInstance = Cast<UGREnemyStatusWidget>(StatusWidget->GetUserWidgetObject());
-	}
 	
-	if (EnemyStatusWidgetInstance)
+	if (UGREnemyStatusWidget* EnemyStatusWidgetInstance = Cast<UGREnemyStatusWidget>(StatusWidget->GetUserWidgetObject()))
 	{
 		EnemyStatusWidgetInstance->SetHealthRatio(1.f);
 	}
@@ -198,7 +193,7 @@ void AGREnemy::OnHealthChanged(UHealthComponent* HC, float OldValue, float NewVa
 		GetWorldTimerManager().SetTimer(DamageReactionHandle, this, &AGREnemy::ResetDamageReaction, 0.2f, false);
 		GetMesh()->SetRelativeScale3D(FVector(0.7f, 1.0f, 1.1f));
 
-		if (EnemyStatusWidgetInstance)
+		if (UGREnemyStatusWidget* EnemyStatusWidgetInstance = Cast<UGREnemyStatusWidget>(StatusWidget->GetUserWidgetObject()))
 		{
 			EnemyStatusWidgetInstance->SetHealthRatio(HC->GetHealthNormalized());
 		}

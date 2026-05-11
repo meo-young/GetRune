@@ -74,6 +74,7 @@ void AGRPlayer::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = CharacterInfo->MoveSpeed;
 	MagnetCollision->SetSphereRadius(CharacterInfo->MagnetRadius);
 	RequiredRuneCount = CharacterInfo->RequiredRuneCount;
+	OnRuneCountChanged.Broadcast(0, RequiredRuneCount);
 
 	for (const FRuneSkillEntry* Entry : { &CharacterInfo->RuneSkillData_1,
 										   &CharacterInfo->RuneSkillData_2,
@@ -166,6 +167,7 @@ bool AGRPlayer::AddRune(ERuneType RuneType)
 	++(*Count);
 	++TotalRuneCount;
 	RuneLastAcquired[RuneType] = TotalRuneCount;
+	OnRuneCountChanged.Broadcast(TotalRuneCount, RequiredRuneCount);
 	return true;
 }
 
@@ -194,6 +196,7 @@ void AGRPlayer::Attack()
 	for (auto& Pair : RuneCounts) Pair.Value = 0;
 	for (auto& Pair : RuneLastAcquired) Pair.Value = 0;
 	TotalRuneCount = 0;
+	OnRuneCountChanged.Broadcast(0, RequiredRuneCount);
 
 	FireSkill();
 }

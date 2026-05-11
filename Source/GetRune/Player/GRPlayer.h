@@ -5,6 +5,8 @@
 #include "GetRune/Data/CharacterInfo.h"
 #include "GRPlayer.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRuneCountChanged, int32, CurrentRuneNum, int32, MaxRuneNum);
+
 class UIndicatorComponent;
 class URuneSpawner;
 class USphereComponent;
@@ -26,8 +28,13 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
 	
-// IAbilitySystem Interface	
-public:	
+// Delegate
+public:
+	FOnRuneCountChanged OnRuneCountChanged;
+
+
+// IAbilitySystem Interface
+public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override final;
 	
 	

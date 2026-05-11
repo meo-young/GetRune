@@ -6,13 +6,15 @@
 
 class UGREnemyCounterWidget;
 class UGRWaveInfoWidget;
+class UGRRuneCounterWidget;
+class UGRPlayerStatusWidget;
 
 UCLASS()
 class GETRUNE_API AGRHUD : public AHUD
 {
 	GENERATED_BODY()
 
-// Lifecycle	
+// Lifecycle
 public:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
@@ -26,11 +28,23 @@ public:
 	UPROPERTY()
 	TObjectPtr<UGRWaveInfoWidget> WaveInfoWidgetInstance;
 
+	UPROPERTY()
+	TObjectPtr<UGRRuneCounterWidget> RuneCounterWidgetInstance;
+
+	UPROPERTY()
+	TObjectPtr<UGRPlayerStatusWidget> PlayerStatusWidgetInstance;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "변수|UI")
 	TSubclassOf<UGREnemyCounterWidget> EnemyCounterWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "변수|UI")
 	TSubclassOf<UGRWaveInfoWidget> WaveInfoWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "변수|UI")
+	TSubclassOf<UGRRuneCounterWidget> RuneCounterWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "변수|UI")
+	TSubclassOf<UGRPlayerStatusWidget> PlayerStatusWidgetClass;
 	
 };

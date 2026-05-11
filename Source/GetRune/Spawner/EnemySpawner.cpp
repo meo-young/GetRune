@@ -86,6 +86,8 @@ void UEnemySpawner::SpawnBoss()
 	if (!Boss) return;
 
 	Boss->InitializeFromEnemyInfo(BossInfo);
+	++CurrentEnemyNum;
+	OnEnemyCountChanged.Broadcast(CurrentEnemyNum);
 }
 
 const UEnemyInfo* UEnemySpawner::SelectEnemyByWeight(const FWaveInfo& WaveInfo) const

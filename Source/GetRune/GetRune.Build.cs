@@ -20,7 +20,8 @@ public class GetRune : ModuleRules
 			"GameplayTasks",
 			"AIModule",
 			"NavigationSystem",
-			"Niagara"
+			"Niagara",
+				"UMG"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

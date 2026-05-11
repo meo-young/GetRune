@@ -12,9 +12,13 @@
 #include "GetRune/AbilitySystem/Attributes/GRHealthSet.h"
 #include "GetRune/Data/StageInfo.h"
 #include "GetRune/GRGameplayTags.h"
+#include "GetRune/GameState/GRGameState.h"
 #include "GetRune/Item/GRItemBase.h"
 #include "GetRune/Player/GRPlayer.h"
+#include "GetRune/Spawner/EnemySpawner.h"
 #include "GetRune/Subsystem/GRObjectPoolSubsystem.h"
+#include "GetRune/UI/GREnemyCounterWidget.h"
+#include "GetRune/UI/GRHUD.h"
 #include "Kismet/GameplayStatics.h"
 
 AGREnemy::AGREnemy()
@@ -55,14 +59,6 @@ void AGREnemy::BeginPlay()
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AGREnemy::OnCapsuleBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &AGREnemy::OnCapsuleEndOverlap);
-
-	ASC->GetGameplayAttributeValueChangeDelegate(
-		UGRHealthSet::GetHealthAttribute()).AddUObject(this, &AGREnemy::OnHealthChanged);
-
-	if (const UGRHealthSet* HealthSet = ASC->GetSet<UGRHealthSet>())
-	{
-		HealthSet->OnOutOfHealth.AddUObject(this, &AGREnemy::HandleDeath);
-	}
 }
 
 void AGREnemy::PossessedBy(AController* NewController)
@@ -122,8 +118,12 @@ void AGREnemy::HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplay
 
 	GetCharacterMovement()->bUseRVOAvoidance = false;
 	GetWorldTimerManager().ClearTimer(ContactCooldownHandle);
+	
+	GetWorld()->GetGameState<AGRGameState>()->EnemySpawnManager->DecrementEnemyNum();
 
 	DropItems();
+	
+	Super::HandleDeath(InInstigator, Causer, Spec, Magnitude, OldValue, NewValue);
 }
 
 void AGREnemy::FinishDeath()

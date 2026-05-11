@@ -8,6 +8,8 @@
 
 class AGRPlayer;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyCountChanged, int32, EnemyCount);
+
 UCLASS()
 class GETRUNE_API UEnemySpawner : public UGRSpawnerBase
 {
@@ -16,6 +18,11 @@ class GETRUNE_API UEnemySpawner : public UGRSpawnerBase
 // Lifecycle	
 public:
 	UEnemySpawner();
+	
+	
+// Delegate	
+public:
+	FOnEnemyCountChanged OnEnemyCountChanged;
 	
 
 // Member Function
@@ -37,5 +44,14 @@ private:
 	const FStageInfo* CurrentStageInfo = nullptr;
 	int32 CurrentWaveNum = 0;
 	FTimerHandle WaveTimerHandle;
+	int32 CurrentEnemyNum = 0;
+	
+	
+// Getter, Setter	
+public:
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE int32 GetCurrentEnemyNum() const { return CurrentEnemyNum; }
+	
+	void DecrementEnemyNum();
 
 };

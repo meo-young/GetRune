@@ -41,8 +41,12 @@ public:
 	virtual void Attack() {}
 	virtual void OnAttackFinished() {}
 
+protected:
+	virtual void HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplayEffectSpec* Spec, float Magnitude, float OldValue, float NewValue) override;
+	virtual void OnHealthChanged(const FOnAttributeChangeData& Data) override;
+
+	
 private:
-	void HandleDeath(AActor* InInstigator, AActor* Causer, const FGameplayEffectSpec* Spec, float Magnitude, float OldValue, float NewValue);
 	void DropItems() const;
 
 	UFUNCTION()
@@ -57,7 +61,6 @@ private:
 	void ApplyContactDamage(UAbilitySystemComponent* PlayerASC);
 	void OnContactDamageTimer();
 
-	void OnHealthChanged(const FOnAttributeChangeData& Data);
 	void ResetDamageReaction();
 
 

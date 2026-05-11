@@ -8,4 +8,7 @@ UCLASS()
 class GETRUNE_API AGRPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+	
+public:
+	virtual void BeginPlay() override;
 };

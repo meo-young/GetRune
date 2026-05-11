@@ -3,7 +3,9 @@
     "allow": [
       "PowerShell(New-Item *)",
       "PowerShell(Get-ChildItem -Path \"D:\\\\Unreal_Project\\\\GetRune\\\\Source\\\\GetRune\" -Recurse -File | Where-Object {$_.Name -match \"^GR\\(Player|PlayerState|AbilitySystemComponent|AbilitySet|HealthSet|CombatSet\\)\" -or $_.Name -match \"^GE_\"} | Select-Object FullName)",
-      "PowerShell(Get-ChildItem -Path \"D:\\\\Unreal_Project\\\\GetRune\\\\Source\\\\GetRune\" -Recurse | Where-Object {$_.Name -match \"GRPlayer|GRAbility|GRHealth|GRCombat|GE_\"} | Select-Object FullName)"
+      "PowerShell(Get-ChildItem -Path \"D:\\\\Unreal_Project\\\\GetRune\\\\Source\\\\GetRune\" -Recurse | Where-Object {$_.Name -match \"GRPlayer|GRAbility|GRHealth|GRCombat|GE_\"} | Select-Object FullName)",
+      "Bash(Get-ChildItem -Recurse -Path \"D:\\\\Unreal_Project\\\\GetRune\\\\Source\" -Filter \"GRGame*\")",
+      "Bash(Select-Object FullName)"
     ]
   }
 }

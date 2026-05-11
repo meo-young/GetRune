@@ -16,7 +16,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GetRune/Character/GRCharacterMovementComponent.h"
 #include "GetRune/Data/SkillInfo.h"
-#include "GetRune/GameMode/GRGameMode.h"
+#include "GetRune/GameState/GRGameState.h"
 #include "GetRune/Item/Rune/GRRuneBase.h"
 #include "GetRune/Spawner/RuneSpawner.h"
 #include "GetRune/Subsystem/GRDataTableSubsystem.h"
@@ -73,7 +73,7 @@ void AGRPlayer::BeginPlay()
 		RuneLastAcquired.Add(Entry->RuneType, 0);
 	}
 	
-	RuneSpawner = Cast<AGRGameMode>(GetWorld()->GetAuthGameMode())->RuneSpawnManager;
+	RuneSpawner = GetWorld()->GetGameState<AGRGameState>()->RuneSpawnManager;
 }
 
 void AGRPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

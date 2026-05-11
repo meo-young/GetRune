@@ -71,6 +71,8 @@ void UEnemySpawner::Spawn()
 	if (!Enemy) return;
 
 	Enemy->InitializeFromEnemyInfo(EnemyInfo);
+	++CurrentEnemyNum;
+	OnEnemyCountChanged.Broadcast(CurrentEnemyNum);
 }
 
 void UEnemySpawner::SpawnBoss()
@@ -106,6 +108,12 @@ const UEnemyInfo* UEnemySpawner::SelectEnemyByWeight(const FWaveInfo& WaveInfo) 
 	return nullptr;
 }
 
+void UEnemySpawner::DecrementEnemyNum()
+{
+	--CurrentEnemyNum;
+	OnEnemyCountChanged.Broadcast(CurrentEnemyNum);
+}
+
 FVector UEnemySpawner::GetRandomSpawnLocation() const
 {
 	const float Angle = FMath::RandRange(0.f, 360.f);
@@ -114,5 +122,5 @@ FVector UEnemySpawner::GetRandomSpawnLocation() const
 		FMath::Sin(FMath::DegreesToRadians(Angle)),
 		0.f
 	);
-	return Player->GetActorLocation() + Dir * 1000.f;
+	return Player->GetActorLocation() + Dir * 1400.f;
 }

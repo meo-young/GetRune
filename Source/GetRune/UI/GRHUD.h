@@ -5,6 +5,7 @@
 #include "GRHUD.generated.h"
 
 class UGREnemyCounterWidget;
+class UGRWaveInfoWidget;
 
 UCLASS()
 class GETRUNE_API AGRHUD : public AHUD
@@ -21,9 +22,15 @@ public:
 public:
 	UPROPERTY()
 	TObjectPtr<UGREnemyCounterWidget> EnemyCounterWidgetInstance;
-	
+
+	UPROPERTY()
+	TObjectPtr<UGRWaveInfoWidget> WaveInfoWidgetInstance;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "변수|UI")
 	TSubclassOf<UGREnemyCounterWidget> EnemyCounterWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "변수|UI")
+	TSubclassOf<UGRWaveInfoWidget> WaveInfoWidgetClass;
 	
 };

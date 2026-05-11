@@ -9,6 +9,7 @@
 class AGRPlayer;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyCountChanged, int32, EnemyCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWaveChanged, int32, WaveNum);
 
 UCLASS()
 class GETRUNE_API UEnemySpawner : public UGRSpawnerBase
@@ -23,6 +24,8 @@ public:
 // Delegate	
 public:
 	FOnEnemyCountChanged OnEnemyCountChanged;
+
+	FOnWaveChanged OnWaveChanged;
 	
 
 // Member Function

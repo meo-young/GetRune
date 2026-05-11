@@ -12,6 +12,7 @@ class GETRUNE_API UGRWaveInfoWidget : public UGRUserWidget
 	GENERATED_BODY()
 	
 public:
+	UFUNCTION()
 	void SetWaveNum(const int32 WaveNum);
 	
 private:

@@ -32,6 +32,8 @@ void UEnemySpawner::StartWave()
 {
 	if (!CurrentStageInfo || CurrentWaveNum >= CurrentStageInfo->WaveInfos.Num()) return;
 
+	OnWaveChanged.Broadcast(CurrentWaveNum + 1);
+
 	const FWaveInfo& WaveInfo = CurrentStageInfo->WaveInfos[CurrentWaveNum];
 	SpawnInterval = WaveInfo.EnemySpawnInterval;
 	Super::StartSpawn();

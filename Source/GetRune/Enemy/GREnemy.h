@@ -85,9 +85,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "변수|GE")
 	TSubclassOf<UGameplayEffect> ContactDamageGE;
 	
-	UPROPERTY()
-	TObjectPtr<UGREnemyStatusWidget> EnemyStatusWidgetInstance;
-	
 protected:
 	UPROPERTY()
 	const UEnemyInfo* CurrentEnemyInfo = nullptr;

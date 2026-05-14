@@ -14,6 +14,7 @@
 #include "GetRune/GRGameplayTags.h"
 #include "GetRune/AbilitySystem/GRAbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "GRPlayerCameraManager.h"
 #include "GetRune/Character/GRCharacterMovementComponent.h"
 #include "GetRune/Data/SkillInfo.h"
 #include "GetRune/GameState/GRGameState.h"
@@ -28,6 +29,9 @@
 #include "GetRune/Component/IndicatorComponent.h"
 #include "GetRune/Enemy/GREnemy.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Sound/SoundCue.h"
+#include "GetRune/Projectile/GRProjectilePiercing.h"
+#include "GetRune/Subsystem/GRObjectPoolSubsystem.h"
 
 AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -75,6 +79,12 @@ AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(Object
 void AGRPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	// 플레이어 카메라 매니저 캐싱
+	if (APlayerController* PC = GetController<APlayerController>())
+	{
+		PCM = Cast<AGRPlayerCameraManager>(PC->PlayerCameraManager);
+	}
 	
 	// Collision Overlap 이벤트에 함수를 바인딩합니다.
 	MagnetCollision->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnMagnetBeginOverlap);
@@ -233,7 +243,7 @@ void AGRPlayer::FireSkill()
 			GetActorLocation(), FRotator::ZeroRotator, FVector(Scale));
 	}
 
-	if (AActor* NearestEnemy = FindNearestEnemy(2000.f))
+	if (AActor* NearestEnemy = FindNearestEnemy(EnemySearchRadius))
 	{
 		MotionWarpingComponent->AddOrUpdateWarpTargetFromComponent(
 			TEXT("AttackTarget"), NearestEnemy->GetRootComponent(), NAME_None, true);
@@ -241,6 +251,46 @@ void AGRPlayer::FireSkill()
 
 	PlayAnimMontage(CurrentSkillInfo->AttackMontage);
 }
+
+void AGRPlayer::LaunchProjectile()
+{
+	if (!CurrentSkillInfo) return;
+
+	// 발사 방향 결정
+	FVector LaunchDirection = GetActorForwardVector();
+	if (AActor* NearestEnemy = FindNearestEnemy(EnemySearchRadius))
+	{
+		FVector ToEnemy = NearestEnemy->GetActorLocation() - GetActorLocation();
+		ToEnemy.Z = 0.f;
+		LaunchDirection = ToEnemy.GetSafeNormal();
+	}
+
+	// 발사 이펙트 재생
+	if (CurrentSkillInfo->MuzzleEffect.Effect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), CurrentSkillInfo->MuzzleEffect.Effect,
+			GetActorLocation(), LaunchDirection.Rotation());
+	}
+	if (CurrentSkillInfo->MuzzleEffect.Sound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, CurrentSkillInfo->MuzzleEffect.Sound, GetActorLocation());
+	}
+
+	// 투사체 스폰 및 발사
+	UGRObjectPoolSubsystem* OPS = GetGameInstance()->GetSubsystem<UGRObjectPoolSubsystem>();
+	if (!OPS) return;
+
+	AGRProjectilePiercing* Projectile = Cast<AGRProjectilePiercing>(OPS->AcquireActor(
+		ProjectileClass, GetActorLocation(), LaunchDirection.Rotation()));
+	if (!Projectile) return;
+
+	Projectile->Launch(LaunchDirection, CurrentDamage,
+		CurrentSkillInfo->SkillSpeed, CurrentSkillInfo->DamageEffect, GetAbilitySystemComponent(), CurrentSkillInfo);
+
+
+	PCM->PlayCameraShake(CurrentSkillInfo->CameraShakeScale, CurrentSkillInfo->CameraShakeDuration);
+}
+
 
 AActor* AGRPlayer::FindNearestEnemy(float Radius) const
 {

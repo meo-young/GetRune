@@ -18,11 +18,14 @@ public:
 	virtual void BeginPlay() override;
 
 	
-// Member Function	
+// Member Function
 private:
 	void CreateSpawners();
 	void InitializeSpawners();
 	void StartSpawners();
+
+	UFUNCTION()
+	void OnWaveChanged(int32 WaveNum);
 
 	
 // Member Variable	

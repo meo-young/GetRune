@@ -2,8 +2,10 @@
 #include "GameFramework/Character.h"
 #include "GetRune/GetRune.h"
 #include "GetRune/Data/RuneInfo.h"
+#include "GetRune/Data/StageInfo.h"
 #include "GetRune/Item/Rune/GRRuneBase.h"
 #include "GetRune/Player/GRPlayer.h"
+#include "GetRune/Player/GRPlayerState.h"
 #include "GetRune/Subsystem/GRDataTableSubsystem.h"
 #include "GetRune/Subsystem/GRObjectPoolSubsystem.h"
 #include "Kismet/GameplayStatics.h"
@@ -21,29 +23,53 @@ URuneSpawner::URuneSpawner()
 void URuneSpawner::Initialize()
 {
 	Super::Initialize();
-	
-	// 데이터 테이블에서 소유 캐릭터의 룬 설정을 가져옵니다.
+
 	const UGRDataTableSubsystem* DTS = GetDataTableSubsystem();
+
 	if (const FCharacterInfo* Info = DTS->GetCharacterInfo(Player->GetClass()))
 	{
 		AllowedRuneTypes = Info->GetAllowedRuneTypes();
-		SpawnInterval = Info->RuneSpawnInterval;
 	}
 
-	// 허용된 룬 타입별로 오브젝트 풀을 미리 생성합니다.
-	if (AllowedRuneTypes.Num() > 0)
+	const AGRPlayerState* PlayerState = Cast<AGRPlayerState>(Player->GetPlayerState());
+	if (PlayerState)
+	{
+		CurrentStageInfo = DTS->GetStageInfo(PlayerState->GetCurrentStageNum());
+	}
+
+	// 전체 웨이브 중 가장 큰 MaxRuneCount로 풀을 미리 할당합니다.
+	int32 PeakMaxRuneCount = 0;
+	if (CurrentStageInfo)
+	{
+		for (const FWaveInfo& WaveInfo : CurrentStageInfo->WaveInfos)
+		{
+			PeakMaxRuneCount = FMath::Max(PeakMaxRuneCount, WaveInfo.MaxRuneCount);
+		}
+	}
+
+	if (AllowedRuneTypes.Num() > 0 && PeakMaxRuneCount > 0)
 	{
 		UGRObjectPoolSubsystem* Pool = GetObjectPoolSubsystem();
 
 		for (ERuneType RuneType : AllowedRuneTypes)
 		{
-			const int32 RunePerMaxSize = RuneData->MaxRuneCount/AllowedRuneTypes.Num();
+			const int32 RunePerMaxSize = PeakMaxRuneCount / AllowedRuneTypes.Num();
 			const FRuneClassData* RuneClassData = RuneData->RuneClass.Find(RuneType);
-
 			Pool->InitializePools(RuneClassData->RuneClass, RunePerMaxSize);
 		}
 	}
 
+	SpawnedCount = 0;
+}
+
+void URuneSpawner::OnWaveStarted(int32 WaveIndex)
+{
+	if (!CurrentStageInfo || !CurrentStageInfo->WaveInfos.IsValidIndex(WaveIndex)) return;
+
+	const FWaveInfo& WaveInfo = CurrentStageInfo->WaveInfos[WaveIndex];
+	StopSpawn();
+	SpawnInterval = WaveInfo.RuneSpawnInterval;
+	CurrentMaxRuneCount = WaveInfo.MaxRuneCount;
 	SpawnedCount = 0;
 	StartSpawn();
 }
@@ -52,7 +78,7 @@ void URuneSpawner::Spawn()
 {
 	if (AllowedRuneTypes.IsEmpty()) return;
 	
-	if (SpawnedCount >= RuneData->MaxRuneCount) return;
+	if (SpawnedCount >= CurrentMaxRuneCount) return;
 	
 	UGRObjectPoolSubsystem* Pool = GetObjectPoolSubsystem();
 	if (!Pool) return;

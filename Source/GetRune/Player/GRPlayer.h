@@ -5,6 +5,7 @@
 #include "GetRune/Data/CharacterInfo.h"
 #include "GRPlayer.generated.h"
 
+class AGRPlayerCameraManager;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRuneCountChanged, int32, CurrentRuneNum, int32, MaxRuneNum);
 
 class UIndicatorComponent;
@@ -16,6 +17,8 @@ class UGRInputConfig;
 class UCameraComponent;
 class USpringArmComponent;
 class UInputMappingContext;
+class AGRProjectilePiercing;
+class UGRSkillCameraShake;
 
 UCLASS()
 class GETRUNE_API AGRPlayer : public AGRCharacter
@@ -42,6 +45,7 @@ public:
 // Member Function
 public:
 	bool AddRune(ERuneType RuneType);
+	void LaunchProjectile();
 	USkillInfo* GetCurrentSkillInfo() const { return CurrentSkillInfo; }
 	float GetCurrentDamage() const { return CurrentDamage; }
 	AActor* FindNearestEnemy(float Radius) const;
@@ -92,12 +96,18 @@ private:
 
 // Attack Variable
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "변수|공격")
+	TSubclassOf<AGRProjectilePiercing> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "변수|공격", meta = (DisplayName = "적 탐색 반경"))
+	float EnemySearchRadius = 2000.f;
+
 	UPROPERTY()
 	TMap<ERuneType, FSkillTierData> CachedSkillData;
 
 	UPROPERTY()
 	TObjectPtr<USkillInfo> CurrentSkillInfo;
-	
+
 	UPROPERTY()
 	TObjectPtr<URuneSpawner> RuneSpawner;
 
@@ -110,6 +120,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<UNiagaraSystem> CurrentAttackEffect;
 	int32 LastAttackTier = 1;
+	
+	UPROPERTY()
+	TObjectPtr<AGRPlayerCameraManager> PCM;
 	
 	
 };

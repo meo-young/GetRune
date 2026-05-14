@@ -25,20 +25,23 @@ public:
 public:
 	virtual void Initialize() override;
 	virtual void Spawn() override;
+	void OnWaveStarted(int32 WaveIndex);
 	const URuneInfo* GetRuneData() const { return RuneData; }
-	
-	
+
+
 private:
 	virtual FVector GetRandomSpawnLocation() const override;
 
-	
-// Member Variable	
+
+// Member Variable
 private:
 	UPROPERTY(VisibleAnywhere, Category = "변수|룬")
 	TObjectPtr<URuneInfo> RuneData;
-	
-	
-private:	
+
+	const struct FStageInfo* CurrentStageInfo = nullptr;
+	int32 CurrentMaxRuneCount = 0;
+
+private:
 	TArray<ERuneType> AllowedRuneTypes;
 	
 };

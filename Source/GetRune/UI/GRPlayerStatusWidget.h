@@ -15,6 +15,10 @@ class GETRUNE_API UGRPlayerStatusWidget : public UGRUserWidget
 public:
 	UFUNCTION()
 	void SetHealthText(UHealthComponent* HC, float OldValue, float NewValue, AActor* Instigator);
+
+protected:
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayVignetteEffect();
 	
 private:
 	UPROPERTY(meta = (BindWidget))

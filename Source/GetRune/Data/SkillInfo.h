@@ -133,5 +133,13 @@ public:
 	/** 스킬 피격 시 출력하는 이펙트입니다. */
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "피격 이펙트"))
 	FNiagaraEffectInfo HitEffect;
-	
+
+	/** 카메라 흔들림 강도입니다. */
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "카메라 흔들림 강도", ClampMin = "0.0", ClampMax = "5.0"))
+	float CameraShakeScale = 1.0f;
+
+	/** 카메라 흔들림 지속시간(초)입니다. */
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "카메라 흔들림 지속시간", ClampMin = "0.0"))
+	float CameraShakeDuration = 0.3f;
+
 };

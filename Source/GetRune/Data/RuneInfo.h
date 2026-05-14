@@ -45,7 +45,5 @@ public:
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "소환 최대 범위"))
 	float OuterRadius = 700.f;
 
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "최대 소환 룬 개수"))
-	int32 MaxRuneCount = 100;
 
 };

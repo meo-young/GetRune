@@ -28,10 +28,6 @@ struct GETRUNE_API FCharacterInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "스킬 발동 최대 룬 개수"))
 	uint8 RequiredRuneCount = 15;
 	
-	/** 캐릭터 주변으로 에너지를 생성하는 간격입니다. */
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "룬 생성 간격"))
-	float RuneSpawnInterval = 3.0f;
-	
 	/** 첫 번째 룬에 대한 스킬 정보입니다. */
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "첫 번째 룬"))
 	FRuneSkillEntry RuneSkillData_1;

@@ -58,7 +58,13 @@ public:
 	
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "적 소환 간격"))
 	float EnemySpawnInterval = 2;
-	
+
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "룬 소환 간격"))
+	float RuneSpawnInterval = 3.f;
+
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "최대 소환 룬 개수"))
+	int32 MaxRuneCount = 100;
+
 	UPROPERTY(EditAnywhere, meta = (DisplayName = "웨이브 종료 보상 룬 개수"))
 	int32 BonusRuneCount = 5;
 	

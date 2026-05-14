@@ -31,6 +31,11 @@ void AGRGameState::InitializeSpawners()
 
 void AGRGameState::StartSpawners()
 {
-	RuneSpawnManager->StartSpawn();
+	EnemySpawnManager->OnWaveChanged.AddDynamic(this, &ThisClass::OnWaveChanged);
 	EnemySpawnManager->StartSpawn();
+}
+
+void AGRGameState::OnWaveChanged(int32 WaveNum)
+{
+	RuneSpawnManager->OnWaveStarted(WaveNum - 1);
 }

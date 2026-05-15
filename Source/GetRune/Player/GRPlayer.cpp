@@ -32,6 +32,7 @@
 #include "Sound/SoundCue.h"
 #include "GetRune/Projectile/GRProjectilePiercing.h"
 #include "GetRune/Subsystem/GRObjectPoolSubsystem.h"
+#include "GetRune/Subsystem/SoundSubsystem.h"
 
 AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -76,6 +77,7 @@ AGRPlayer::AGRPlayer(const FObjectInitializer& ObjectInitializer) : Super(Object
 	}
 }
 
+
 void AGRPlayer::BeginPlay()
 {
 	Super::BeginPlay();
@@ -115,6 +117,7 @@ void AGRPlayer::BeginPlay()
 	}
 }
 
+
 void AGRPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -153,6 +156,7 @@ void AGRPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	
 }
 
+
 UAbilitySystemComponent* AGRPlayer::GetAbilitySystemComponent() const
 {
 	if (const AGRPlayerState* PS = GetPlayerState<AGRPlayerState>())
@@ -162,6 +166,7 @@ UAbilitySystemComponent* AGRPlayer::GetAbilitySystemComponent() const
 	
 	return Super::GetAbilitySystemComponent();
 }
+
 
 void AGRPlayer::Input_Move(const FInputActionValue& InputActionValue)
 {
@@ -179,9 +184,12 @@ void AGRPlayer::Input_Move(const FInputActionValue& InputActionValue)
 	}
 }
 
+
 bool AGRPlayer::AddRune(ERuneType RuneType)
 {
 	if (TotalRuneCount >= RequiredRuneCount) return false;
+	
+	USoundSubsystem::Get(this).PlaySFXByName(FName("GetEnergy"));
 
 	int32* Count = RuneCounts.Find(RuneType);
 	if (!Count) return false;
@@ -192,6 +200,7 @@ bool AGRPlayer::AddRune(ERuneType RuneType)
 	OnRuneCountChanged.Broadcast(TotalRuneCount, RequiredRuneCount);
 	return true;
 }
+
 
 void AGRPlayer::Attack()
 {
@@ -232,6 +241,7 @@ void AGRPlayer::Attack()
 	FireSkill();
 }
 
+
 void AGRPlayer::FireSkill()
 {
 	if (!CurrentSkillInfo || !CurrentSkillInfo->AttackMontage) return;
@@ -251,6 +261,7 @@ void AGRPlayer::FireSkill()
 
 	PlayAnimMontage(CurrentSkillInfo->AttackMontage);
 }
+
 
 void AGRPlayer::LaunchProjectile()
 {
@@ -313,6 +324,7 @@ AActor* AGRPlayer::FindNearestEnemy(float Radius) const
 	return NearestEnemy;
 }
 
+
 int32 AGRPlayer::GetCurrentTier() const
 {
 	const int32 Tier1Max = RequiredRuneCount / 3;
@@ -322,6 +334,7 @@ int32 AGRPlayer::GetCurrentTier() const
 	if (TotalRuneCount <= Tier2Max) return 2;
 	return 3;
 }
+
 
 ERuneType AGRPlayer::GetDominantRuneType() const
 {
@@ -351,6 +364,18 @@ ERuneType AGRPlayer::GetDominantRuneType() const
 	return DominantType;
 }
 
+
+void AGRPlayer::OnHealthChanged(UHealthComponent* HC, float OldValue, float NewValue, AActor* InInstigator)
+{
+	Super::OnHealthChanged(HC, OldValue, NewValue, InInstigator);
+
+	if (NewValue < OldValue)
+	{
+		USoundSubsystem::Get(this).PlaySFXByName(FName("PlayerHit"));
+	}
+}
+
+
 void AGRPlayer::Input_MoveCompleted(const FInputActionValue& InputActionValue)
 {
 	if (TotalRuneCount > 0)
@@ -358,6 +383,7 @@ void AGRPlayer::Input_MoveCompleted(const FInputActionValue& InputActionValue)
 		Attack();
 	}
 }
+
 
 void AGRPlayer::OnMagnetBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -368,6 +394,7 @@ void AGRPlayer::OnMagnetBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 		Rune->OnMagnetOverlapped();
 	}
 }
+
 
 void AGRPlayer::OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

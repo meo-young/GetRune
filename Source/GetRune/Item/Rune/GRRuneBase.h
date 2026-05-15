@@ -7,6 +7,7 @@
 #include "GRRuneBase.generated.h"
 
 class URuneSpawner;
+class UNiagaraComponent;
 
 UCLASS()
 class GETRUNE_API AGRRuneBase : public AGRItemBase
@@ -24,7 +25,10 @@ public:
 // Component
 protected:
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UStaticMeshComponent> RuneMesh;	
+	TObjectPtr<UStaticMeshComponent> RuneMesh;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UNiagaraComponent> NiagaraEffect;
 	
 
 public:

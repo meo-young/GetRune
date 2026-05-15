@@ -25,6 +25,6 @@ void UIndicatorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	FVector ToEnemy = NearestEnemy->GetActorLocation() - Player->GetActorLocation();
 	ToEnemy.Z = 0.f;
 	FVector Direction = ToEnemy.GetSafeNormal();
-	SetWorldLocation(Player->GetActorLocation() + Direction * 100.f);
-	SetWorldRotation(FRotator(0.f, ToEnemy.Rotation().Yaw, 0.f));
+	SetWorldLocation(Player->GetActorLocation() + Direction * 150.f);
+	SetWorldRotation(FRotator(-90.f, ToEnemy.Rotation().Yaw, 0.f));
 }

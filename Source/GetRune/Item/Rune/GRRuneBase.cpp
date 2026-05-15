@@ -1,9 +1,10 @@
 #include "GRRuneBase.h"
 
-#include "GetRune/GameMode/GRGameMode.h"
-#include "GetRune/Player/GRPlayer.h"
-#include "GetRune/Spawner/RuneSpawner.h"
-#include "GetRune/Subsystem/GRObjectPoolSubsystem.h"
+AGRRuneBase::AGRRuneBase()
+{
+	RuneMesh = CreateDefaultSubobject<UStaticMeshComponent>("RuneMesh");
+	RuneMesh->SetupAttachment(Mesh);
+}
 
 void AGRRuneBase::BeginPlay()
 {

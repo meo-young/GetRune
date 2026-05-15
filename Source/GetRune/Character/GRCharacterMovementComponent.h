@@ -6,7 +6,6 @@
 #include "GRCharacterMovementComponent.generated.h"
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_MovementStopped);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gameplay_OnlyRotation);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class GETRUNE_API UGRCharacterMovementComponent : public UCharacterMovementComponent

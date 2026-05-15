@@ -13,6 +13,8 @@ namespace GRGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Ability_Attack, "Ability.Attack");
 	
 	UE_DEFINE_GAMEPLAY_TAG(Status_Death, "Status.Death");
+
+	UE_DEFINE_GAMEPLAY_TAG(Gameplay_MovementStopped, "Gameplay.MovementStopped");
 	
 	const TMap<uint8, FGameplayTag> MovementModeTagMap =
 	{

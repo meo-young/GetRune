@@ -172,6 +172,14 @@ void AGRPlayer::Input_Move(const FInputActionValue& InputActionValue)
 {
 	if (!Controller) return;
 
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		if (ASC->HasMatchingGameplayTag(GRGameplayTags::Gameplay_MovementStopped))
+		{
+			return;
+		}
+	}
+
 	const FVector2D Value = InputActionValue.Get<FVector2D>();
 	const FRotator MovementRotation(0.0f, Controller->GetControlRotation().Yaw, 0.0f);
 	if (Value.X != 0.0f)
@@ -378,6 +386,14 @@ void AGRPlayer::OnHealthChanged(UHealthComponent* HC, float OldValue, float NewV
 
 void AGRPlayer::Input_MoveCompleted(const FInputActionValue& InputActionValue)
 {
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		if (ASC->HasMatchingGameplayTag(GRGameplayTags::Gameplay_MovementStopped))
+		{
+			return;
+		}
+	}
+
 	if (TotalRuneCount > 0)
 	{
 		Attack();

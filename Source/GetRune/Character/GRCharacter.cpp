@@ -59,6 +59,12 @@ void AGRCharacter::SetMovementModeTag(EMovementMode CurrentMovementMode, uint8 C
 
 void AGRCharacter::HandleDeath(UHealthComponent* HC, float OldValue, float NewValue, AActor* InInstigator)
 {
+	if (UGRAbilitySystemComponent* ASC = Cast<UGRAbilitySystemComponent>(GetAbilitySystemComponent()))
+	{
+		ASC->SetLooseGameplayTagCount(GRGameplayTags::Status_Death, 1);
+		ASC->SetLooseGameplayTagCount(GRGameplayTags::Gameplay_MovementStopped, 1);
+	}
+
 	OnCharacterDeath.Broadcast();
 }
 

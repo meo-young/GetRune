@@ -134,9 +134,7 @@ void AGREnemy::HandleDeath(UHealthComponent* HC, float OldValue, float NewValue,
 			Brain->StopLogic("Death");
 		}
 	}
-
-	ASC->SetLooseGameplayTagCount(GRGameplayTags::Status_Death, 1);
-
+	
 	GetCharacterMovement()->bUseRVOAvoidance = false;
 	GetWorldTimerManager().ClearTimer(ContactCooldownHandle);
 

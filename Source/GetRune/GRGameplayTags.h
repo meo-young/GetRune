@@ -18,4 +18,6 @@ namespace GRGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Ability_Attack);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Status_Death);
+
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Gameplay_MovementStopped);
 }

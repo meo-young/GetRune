@@ -3,7 +3,6 @@
 #include "AbilitySystemGlobals.h"
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_MovementStopped, "Gameplay.MovementStopped");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Gameplay_OnlyRotation, "Gameplay.OnlyRotation");
 
 FRotator UGRCharacterMovementComponent::GetDeltaRotation(float DeltaTime) const
 {
@@ -22,8 +21,7 @@ float UGRCharacterMovementComponent::GetMaxSpeed() const
 {
 	if (UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner()))
 	{
-		if (ASC->HasMatchingGameplayTag(TAG_Gameplay_MovementStopped) ||
-			ASC->HasMatchingGameplayTag(TAG_Gameplay_OnlyRotation))
+		if (ASC->HasMatchingGameplayTag(TAG_Gameplay_MovementStopped))
 		{
 			return 0;
 		}

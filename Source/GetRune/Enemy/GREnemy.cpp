@@ -18,6 +18,7 @@
 #include "GetRune/Player/GRPlayer.h"
 #include "GetRune/Spawner/EnemySpawner.h"
 #include "GetRune/Subsystem/GRObjectPoolSubsystem.h"
+#include "GetRune/Subsystem/SoundSubsystem.h"
 #include "GetRune/UI/GREnemyCounterWidget.h"
 #include "GetRune/UI/GRHUD.h"
 #include "GetRune/UI/GREnemyStatusWidget.h"
@@ -123,6 +124,8 @@ void AGREnemy::InitializeFromEnemyInfo(const UEnemyInfo* EnemyInfo)
 void AGREnemy::HandleDeath(UHealthComponent* HC, float OldValue, float NewValue, AActor* InInstigator)
 {
 	StopAnimMontage();
+	
+	USoundSubsystem::Get(this).PlaySFXByName(FName("OnEnemyDead"));
 
 	if (AAIController* AIC = GetController<AAIController>())
 	{

@@ -46,9 +46,13 @@ public:
 public:
 	bool AddRune(ERuneType RuneType);
 	void LaunchProjectile();
+	AActor* FindNearestEnemy(float Radius) const;
+
+	
+protected:
+	virtual void OnHealthChanged(UHealthComponent* HC, float OldValue, float NewValue, AActor* InInstigator) override;
 	USkillInfo* GetCurrentSkillInfo() const { return CurrentSkillInfo; }
 	float GetCurrentDamage() const { return CurrentDamage; }
-	AActor* FindNearestEnemy(float Radius) const;
 	UNiagaraSystem* GetCurrentAttackEffect() const { return CurrentAttackEffect; }
 	int32 GetLastAttackTier() const { return LastAttackTier; }
 

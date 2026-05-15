@@ -1,6 +1,7 @@
 #include "GRGameState.h"
 #include "GetRune/Spawner/EnemySpawner.h"
 #include "GetRune/Spawner/RuneSpawner.h"
+#include "GetRune/Subsystem/SoundSubsystem.h"
 
 void AGRGameState::PostInitializeComponents()
 {
@@ -31,6 +32,8 @@ void AGRGameState::InitializeSpawners()
 
 void AGRGameState::StartSpawners()
 {
+	USoundSubsystem::Get(this).PlayBGMByName(TEXT("InGameBGM"));
+	
 	EnemySpawnManager->OnWaveChanged.AddDynamic(this, &ThisClass::OnWaveChanged);
 	EnemySpawnManager->StartSpawn();
 }

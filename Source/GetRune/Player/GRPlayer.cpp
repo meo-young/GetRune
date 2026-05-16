@@ -114,6 +114,11 @@ void AGRPlayer::BeginPlay()
 	if (UGRAbilitySystemComponent* ASC = Cast<UGRAbilitySystemComponent>(GetAbilitySystemComponent()))
 	{
 		HealthComponent->InitializeWithAbilitySystem(ASC);
+
+		// PlayerState의 ASC가 레벨 리로드를 넘어 유지될 때, 이전 사망에서 설정된
+		// 상태 태그가 남아 GetMaxSpeed()를 0으로 묶는 것을 방어합니다.
+		ASC->SetLooseGameplayTagCount(GRGameplayTags::Status_Death, 0);
+		ASC->SetLooseGameplayTagCount(GRGameplayTags::Gameplay_MovementStopped, 0);
 	}
 }
 

@@ -48,7 +48,7 @@ struct FSoundPoolConfig
 
     /** SFX 풀의 초기 크기입니다. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "변수")
-    int32 SFXPoolSize = 16;
+    int32 SFXPoolSize = 30;
 };
 
 /**

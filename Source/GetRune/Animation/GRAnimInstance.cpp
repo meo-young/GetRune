@@ -44,5 +44,6 @@ void UGRAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 	if (!Character || !MovementComponent) return;
 
 	const float Velocity = Character->GetVelocity().Length();
-	MoveSpeedRatio = Velocity / MovementComponent->GetMaxSpeed();
+	const float MaxSpeed = MovementComponent->GetMaxSpeed();
+	MoveSpeedRatio = MaxSpeed > KINDA_SMALL_NUMBER ? Velocity / MaxSpeed : 0.f;
 }

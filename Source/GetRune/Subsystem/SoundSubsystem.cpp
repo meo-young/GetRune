@@ -140,6 +140,7 @@ void USoundSubsystem::PlayBGM(USoundBase* NewBGM)
     UAudioComponent* NextComp = GetAvailableBGMComponent();
     if (IsValid(NextComp))
     {
+        NextComp->bAllowSpatialization = false;
         NextComp->SetSound(NewBGM);
         NextComp->SetVolumeMultiplier(1.0f);
         NextComp->Play();

@@ -20,6 +20,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayVignetteEffect();
 	
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetOrbPercentage(const float InPercentage);
+	
 private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> CurrentPlayerHealth;

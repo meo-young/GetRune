@@ -5,7 +5,7 @@
 void UGRPlayerStatusWidget::SetHealthText(UHealthComponent* HC, float OldValue, float NewValue, AActor* Instigator)
 {
 	CurrentPlayerHealth->SetText(FText::Format(FText::FromString(TEXT("HP : {0}")), FText::AsNumber(FMath::FloorToInt(NewValue))));
-	
+	SetOrbPercentage(HC->GetHealthNormalized());
 	if (OldValue > NewValue)
 	{
 		PlayVignetteEffect();

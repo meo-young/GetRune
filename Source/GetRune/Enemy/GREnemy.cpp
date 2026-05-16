@@ -83,6 +83,7 @@ void AGREnemy::PossessedBy(AController* NewController)
 void AGREnemy::OnActivated()
 {
 	ASC->SetLooseGameplayTagCount(GRGameplayTags::Status_Death, 0);
+	ASC->SetLooseGameplayTagCount(GRGameplayTags::Gameplay_MovementStopped, 0);
 	GetCharacterMovement()->bUseRVOAvoidance = true;
 	
 	if (AAIController* AIC = GetController<AAIController>())

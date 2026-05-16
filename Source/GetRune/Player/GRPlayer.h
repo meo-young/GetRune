@@ -6,7 +6,7 @@
 #include "GRPlayer.generated.h"
 
 class AGRPlayerCameraManager;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRuneCountChanged, int32, CurrentRuneNum, int32, MaxRuneNum);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnRuneCountChanged, int32, CurrentRuneNum, int32, MaxRuneNum, ERuneType, SkillRuneType);
 
 class UIndicatorComponent;
 class URuneSpawner;

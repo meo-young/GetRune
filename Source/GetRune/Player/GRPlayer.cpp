@@ -98,7 +98,7 @@ void AGRPlayer::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = CharacterInfo->MoveSpeed;
 	MagnetCollision->SetSphereRadius(CharacterInfo->MagnetRadius);
 	RequiredRuneCount = CharacterInfo->RequiredRuneCount;
-	OnRuneCountChanged.Broadcast(0, RequiredRuneCount);
+	OnRuneCountChanged.Broadcast(0, RequiredRuneCount, GetDominantRuneType());
 
 	for (const FRuneSkillEntry* Entry : { &CharacterInfo->RuneSkillData_1,
 										   &CharacterInfo->RuneSkillData_2,
@@ -205,7 +205,7 @@ bool AGRPlayer::AddRune(ERuneType RuneType)
 	++(*Count);
 	++TotalRuneCount;
 	RuneLastAcquired[RuneType] = TotalRuneCount;
-	OnRuneCountChanged.Broadcast(TotalRuneCount, RequiredRuneCount);
+	OnRuneCountChanged.Broadcast(TotalRuneCount, RequiredRuneCount, GetDominantRuneType());
 	return true;
 }
 
@@ -244,7 +244,7 @@ void AGRPlayer::Attack()
 	for (auto& Pair : RuneCounts) Pair.Value = 0;
 	for (auto& Pair : RuneLastAcquired) Pair.Value = 0;
 	TotalRuneCount = 0;
-	OnRuneCountChanged.Broadcast(0, RequiredRuneCount);
+	OnRuneCountChanged.Broadcast(0, RequiredRuneCount, GetDominantRuneType());
 
 	FireSkill();
 }
@@ -346,6 +346,8 @@ int32 AGRPlayer::GetCurrentTier() const
 
 ERuneType AGRPlayer::GetDominantRuneType() const
 {
+	if (RuneCounts.IsEmpty()) return ERuneType::Red;
+
 	// 최다 개수 탐색
 	int32 MaxCount = 0;
 	for (const auto& Pair : RuneCounts)

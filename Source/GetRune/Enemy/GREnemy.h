@@ -95,6 +95,8 @@ protected:
 	FTimerHandle ContactCooldownHandle;
 	FTimerHandle DamageReactionHandle;
 	TWeakObjectPtr<AGRPlayer> OverlappingPlayer;
+
+	FVector BaseMeshScale = FVector::OneVector;
 	
 public:
 	FORCEINLINE bool CanAttack() const { return bCanAttack; }

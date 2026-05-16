@@ -67,6 +67,8 @@ void AGREnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
+	BaseMeshScale = GetMesh()->GetRelativeScale3D();
+
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AGREnemy::OnCapsuleBeginOverlap);
 	GetCapsuleComponent()->OnComponentEndOverlap.AddDynamic(this, &AGREnemy::OnCapsuleEndOverlap);
 }
@@ -194,7 +196,7 @@ void AGREnemy::OnHealthChanged(UHealthComponent* HC, float OldValue, float NewVa
 	{
 		GetMesh()->SetScalarParameterValueOnMaterials(FName("Damage.Reaction.Intensity"), 1.f);
 		GetWorldTimerManager().SetTimer(DamageReactionHandle, this, &AGREnemy::ResetDamageReaction, 0.2f, false);
-		GetMesh()->SetRelativeScale3D(FVector(0.7f, 1.0f, 1.1f));
+		GetMesh()->SetRelativeScale3D(BaseMeshScale * FVector(0.7f, 1.0f, 1.1f));
 
 		if (UGREnemyStatusWidget* EnemyStatusWidgetInstance = Cast<UGREnemyStatusWidget>(StatusWidget->GetUserWidgetObject()))
 		{
@@ -205,7 +207,7 @@ void AGREnemy::OnHealthChanged(UHealthComponent* HC, float OldValue, float NewVa
 
 void AGREnemy::ResetDamageReaction()
 {
-	GetMesh()->SetRelativeScale3D(FVector(1.0f, 1.0f, 1.0f));
+	GetMesh()->SetRelativeScale3D(BaseMeshScale);
 	GetMesh()->SetScalarParameterValueOnMaterials(FName("Damage.Reaction.Intensity"), 0.f);
 }
 

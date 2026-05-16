@@ -38,9 +38,8 @@ void USoundSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         UE_LOG(ALogSoundSubsystem, Warning, TEXT("USoundSubsystem::Initialize : 사운드 데이터 테이블을 로드했습니다"));
     }
 
-    // BGM 풀과 SFX 풀을 초기화합니다.
-    InitializeBGMPool();
-    InitializeSFXPool();
+    // 새 월드(레벨 재시작 포함)의 액터 초기화가 끝날 때마다 사운드 풀을 재생성하도록 바인딩합니다.
+    WorldInitializedHandle = FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &USoundSubsystem::HandleWorldInitializedActors);
 
     // SoundMix를 한 번만 Push합니다.
     if (IsValid(MasterSoundMix))
@@ -53,6 +52,8 @@ void USoundSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void USoundSubsystem::Deinitialize()
 {
+    FWorldDelegates::OnWorldInitializedActors.Remove(WorldInitializedHandle);
+
     // 페이드 타이머를 제거합니다.
     UWorld* World = GetWorld();
     if (IsValid(World))
@@ -584,6 +585,32 @@ void USoundSubsystem::InitializeSFXPool()
     }
     
     UE_LOG(ALogSoundSubsystem, Warning, TEXT("USoundSubsystem::InitializeSFXPool : %d 개 생성했습니다."), PoolConfig.SFXPoolSize);
+}
+
+
+void USoundSubsystem::HandleWorldInitializedActors(const UWorld::FActorsInitializedParams& Params)
+{
+    LOG(TEXT("월드 재생성"))
+    // 우리 게임인스턴스의 월드일 때만 풀을 재생성합니다. (에디터/PIE의 다른 월드는 무시)
+    if (Params.World == GetWorld())
+    {
+        RebuildSoundPools();
+    }
+}
+
+
+void USoundSubsystem::RebuildSoundPools()
+{
+    // 이전 월드의 잔여 풀 상태를 정리합니다. 파괴된 컴포넌트는 GC가 처리합니다.
+    BGMPool.Empty();
+    ActiveSFXPool.Empty();
+    AvailableSFXPool.Empty();
+    CurrentBGMIndex = 0;
+    NextBGMIndex = 1;
+    FadeState = EBGMFadeState::None;
+
+    InitializeBGMPool();
+    InitializeSFXPool();
 }
 
 

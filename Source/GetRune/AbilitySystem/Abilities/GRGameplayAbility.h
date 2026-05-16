@@ -30,13 +30,13 @@ public:
 	
 // Member Function	
 protected:
-	/*/** 카메라 모드를 설정합니다. #1#
-	UFUNCTION(BlueprintCallable)
-	void SetCameraMode(TSubclassOf<UGRCameraMode> CameraMode);
-
-	/** 어빌리티로 인해 활성화 되어 있는 카메라 모드를 초기화합니다. EndAbility 에서 자동으로 호출됩니다. #1#
-	UFUNCTION(BlueprintCallable)
-	void ClearCameraMode();*/
+	// 카메라 모드를 설정합니다.
+	// UFUNCTION(BlueprintCallable)
+	// void SetCameraMode(TSubclassOf<UGRCameraMode> CameraMode);
+	//
+	// 어빌리티로 인해 활성화 되어 있는 카메라 모드를 초기화합니다. EndAbility 에서 자동으로 호출됩니다.
+	// UFUNCTION(BlueprintCallable)
+	// void ClearCameraMode();
 
 
 // Member Variable	

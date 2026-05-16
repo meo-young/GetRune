@@ -1,4 +1,6 @@
 #include "GRGameState.h"
+
+#include "GetRune/GetRune.h"
 #include "GetRune/Spawner/EnemySpawner.h"
 #include "GetRune/Spawner/RuneSpawner.h"
 #include "GetRune/Subsystem/SoundSubsystem.h"

@@ -9,6 +9,7 @@ class USkillInfo;
 class UNiagaraSystem;
 class UAnimMontage;
 class UGameplayEffect;
+class USoundCue;
 
 USTRUCT()
 struct FSkillTierData

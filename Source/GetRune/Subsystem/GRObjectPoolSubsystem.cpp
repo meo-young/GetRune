@@ -1,4 +1,5 @@
 #include "GRObjectPoolSubsystem.h"
+#include "Engine/World.h"
 #include "GetRune/GetRune.h"
 #include "GetRune/Interface/Poolable.h"
 #include "GetRune/Item/GRItemBase.h"
@@ -6,6 +7,24 @@
 void UGRObjectPoolSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+	WorldCleanupHandle = FWorldDelegates::OnWorldCleanup.AddUObject(this, &UGRObjectPoolSubsystem::HandleWorldCleanup);
+}
+
+void UGRObjectPoolSubsystem::Deinitialize()
+{
+	FWorldDelegates::OnWorldCleanup.Remove(WorldCleanupHandle);
+
+	Super::Deinitialize();
+}
+
+void UGRObjectPoolSubsystem::HandleWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources)
+{
+	// 정리되는 월드가 현재 월드일 때만 풀을 비웁니다. 풀은 다음 레벨의 스포너 Initialize에서 다시 채워집니다.
+	if (World == GetWorld())
+	{
+		PoolMap.Empty();
+	}
 }
 
 void UGRObjectPoolSubsystem::InitializePools(TSubclassOf<AActor> ActorClass, int32 InitialSize)
@@ -14,14 +33,14 @@ void UGRObjectPoolSubsystem::InitializePools(TSubclassOf<AActor> ActorClass, int
 	if (!World) return;
 
 	// 해당 클래스의 풀을 찾거나 새로 생성합니다.
-	TArray<TObjectPtr<AActor>>& Pool = PoolMap.FindOrAdd(ActorClass);
+	FActorPool& Pool = PoolMap.FindOrAdd(ActorClass);
 
 	// 지정한 수만큼 액터를 미리 스폰해 풀에 채워둡니다.
 	for (int32 i = 0; i < InitialSize; ++i)
 	{
 		if (AActor* Actor = SpawnPooledActor(ActorClass))
 		{
-			Pool.Emplace(Actor);
+			Pool.Actors.Emplace(Actor);
 		}
 	}
 }
@@ -29,15 +48,15 @@ void UGRObjectPoolSubsystem::InitializePools(TSubclassOf<AActor> ActorClass, int
 AActor* UGRObjectPoolSubsystem::AcquireActor(TSubclassOf<AActor> ActorClass, const FVector& Location, const FRotator& Rotation)
 {
 	// 해당 클래스의 풀을 조회합니다.
-	TArray<TObjectPtr<AActor>>* Pool = PoolMap.Find(ActorClass);
+	FActorPool* Pool = PoolMap.Find(ActorClass);
 	AActor* Actor = nullptr;
 
 	if (Pool)
 	{
 		// 유효한 액터를 찾을 때까지 풀에서 꺼냅니다. GC로 무효화된 항목은 건너뜁니다.
-		while (Pool->Num() > 0)
+		while (Pool->Actors.Num() > 0)
 		{
-			TObjectPtr<AActor> Pooled = Pool->Pop(EAllowShrinking::No);
+			TObjectPtr<AActor> Pooled = Pool->Actors.Pop(EAllowShrinking::No);
 			if (IsValid(Pooled))
 			{
 				Actor = Pooled;
@@ -67,7 +86,7 @@ void UGRObjectPoolSubsystem::ReleaseActor(AActor* Actor)
 
 	// 액터를 비활성화한 뒤 해당 클래스의 풀에 반납합니다.
 	Deactivate(Actor);
-	PoolMap.FindOrAdd(Actor->GetClass()).Emplace(Actor);
+	PoolMap.FindOrAdd(Actor->GetClass()).Actors.Emplace(Actor);
 }
 
 AActor* UGRObjectPoolSubsystem::SpawnPooledActor(TSubclassOf<AActor> ActorClass)

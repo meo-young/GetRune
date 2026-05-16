@@ -5,6 +5,7 @@
 #include "Sound/SoundMix.h"
 #include "Sound/SoundClass.h"
 #include "Engine/DataTable.h"
+#include "Engine/World.h"
 #include "SoundSubsystem.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(ALogSoundSubsystem, Log, All);
@@ -196,12 +197,18 @@ public:
 // ─────────────────────────────────────────────────────────────
 // ObjectPooling Function
 // ─────────────────────────────────────────────────────────────
-private:    
+private:
     /** SFX 풀을 초기화하는 함수입니다. */
     void InitializeSFXPool();
 
     /** BGM 풀을 초기화하는 함수입니다. */
     void InitializeBGMPool();
+
+    /** 새 월드의 액터 초기화가 끝났을 때 호출되어 사운드 풀을 재생성합니다. */
+    void HandleWorldInitializedActors(const UWorld::FActorsInitializedParams& Params);
+
+    /** BGM/SFX 풀을 현재 월드 기준으로 재생성합니다. */
+    void RebuildSoundPools();
 
     
 // ─────────────────────────────────────────────────────────────
@@ -302,6 +309,9 @@ private:
 
     /** 풀 설정 구조체입니다. */
     FSoundPoolConfig PoolConfig;
+
+    /** OnWorldInitializedActors 델리게이트 핸들입니다. */
+    FDelegateHandle WorldInitializedHandle;
     
     
 // ─────────────────────────────────────────────────────────────

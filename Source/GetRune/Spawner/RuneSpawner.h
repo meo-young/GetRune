@@ -43,5 +43,5 @@ private:
 
 private:
 	TArray<ERuneType> AllowedRuneTypes;
-	
+
 };

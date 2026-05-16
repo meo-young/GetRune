@@ -120,11 +120,5 @@ void UEnemySpawner::DecrementEnemyNum()
 
 FVector UEnemySpawner::GetRandomSpawnLocation() const
 {
-	const float Angle = FMath::RandRange(0.f, 360.f);
-	const FVector Dir(
-		FMath::Cos(FMath::DegreesToRadians(Angle)),
-		FMath::Sin(FMath::DegreesToRadians(Angle)),
-		0.f
-	);
-	return Player->GetActorLocation() + Dir * 1400.f;
+	return FindSpawnLocationInZone(SpawnRadius, SpawnRadius);
 }

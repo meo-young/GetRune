@@ -97,15 +97,5 @@ void URuneSpawner::Spawn()
 
 FVector URuneSpawner::GetRandomSpawnLocation() const
 {
-	// 무작위 각도와 반경으로 소환 위치를 계산합니다.
-	const float Angle  = FMath::RandRange(0.f, 360.f);
-	const float Radius = FMath::RandRange(RuneData->InnerRadius, RuneData->OuterRadius);
-	const FVector Dir(
-		FMath::Cos(FMath::DegreesToRadians(Angle)),
-		FMath::Sin(FMath::DegreesToRadians(Angle)),
-		0.f
-	);
-
-	// 소유자를 중심으로 원형 범위 내 임의 지점을 반환합니다.
-	return Player->GetActorLocation() + Dir * Radius;
+	return FindSpawnLocationInZone(RuneData->InnerRadius, RuneData->OuterRadius);
 }

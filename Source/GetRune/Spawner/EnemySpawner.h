@@ -48,6 +48,8 @@ private:
 	int32 CurrentWaveNum = 0;
 	FTimerHandle WaveTimerHandle;
 	int32 CurrentEnemyNum = 0;
+
+	static constexpr float SpawnRadius = 1400.f;
 	
 	
 // Getter, Setter	
